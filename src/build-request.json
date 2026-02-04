@@ -1,106 +1,156 @@
 {
   "kind": "build_request",
-  "title": "Stabilize app when backend canister is stopped and add backend health verification",
-  "priority": "high",
+  "title": "Room selection for bookings, calendar/availability, hotel booking history, shareable payment methods, currency selection, and bilingual UI",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-24",
-      "text": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning a small, stable response (at minimum: a boolean `ok` plus a `timestamp` from `Time.now()`), and ensure it cannot trap for anonymous callers.",
-      "target": "backend",
+      "text": "Add required room-type selection to the guest booking flow so a guest cannot submit a booking without choosing a room type, and the chosen room type is stored and displayed in both Guest Account booking history and Hotel Area booking management.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-1"
         ],
         "quotes": [
-          "Ya, semua kena"
+          "1. pilihan kamar yang belum ada jika mau booking di akun tamu."
         ]
       },
       "acceptanceCriteria": [
-        "Anonymous callers can invoke the health endpoint successfully (no traps).",
-        "Authenticated callers can invoke the health endpoint successfully.",
-        "The response shape is stable and does not depend on any optional/legacy state."
+        "When a guest opens the booking request dialog, the form includes a required 'Room type' selection populated from the hotel's room inventory.",
+        "Booking submission is blocked with a clear inline validation message if no room type is selected.",
+        "The backend booking record includes the selected room type and returns it in guest and hotel booking list queries.",
+        "Guest booking list cards display the selected room type.",
+        "Hotel booking list cards display the selected room type."
       ]
     },
     {
       "id": "REQ-25",
-      "text": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
-      "target": "frontend",
+      "text": "Implement a calendar feature for booking/reservation needs: provide (1) a Hotel Area calendar view that shows booking occupancy over time and (2) an availability-aware date selection experience in the guest booking dialog using backend-provided booked ranges.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-1"
         ],
         "quotes": [
-          "Ya, semua kena"
+          "2. kalender."
         ]
       },
       "acceptanceCriteria": [
-        "When the backend canister is stopped (IC0508), the app consistently shows the diagnostics error card instead of partially rendering pages that later fail.",
-        "Actor initialization never remains in a perpetual loading state; it always resolves to ready or error within the configured timeout budget.",
-        "Access-control initialization remains non-blocking (a failure produces only a warning, not a hard failure) when the backend is otherwise healthy."
+        "Hotel Area includes a new 'Calendar' (or 'Availability') section/tab showing bookings on a calendar timeline (at minimum by date range, and filterable by room type if room types exist).",
+        "Backend exposes a query API that returns booking date ranges for a given hotel (and optionally room type) for a requested time window without trapping on missing/legacy data.",
+        "Guest booking date pickers prevent selecting invalid ranges when dates are already booked for the chosen room type (or clearly warn and block submission if conflicts exist).",
+        "Calendar and availability checks do not break existing booking creation and confirmation flows."
       ]
     },
     {
       "id": "REQ-26",
-      "text": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
+      "text": "Fix Hotel Area booking history so bookings do not disappear after confirmation; provide a status filter (Pending / Confirmed / Rejected / Cancelled) and a default view that includes confirmed bookings.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-1"
         ],
         "quotes": [
-          "Ya, semua kena"
+          "3. riwayat bookingan di akun hotel setelah di konfirmasi langsung hilang."
         ]
       },
       "acceptanceCriteria": [
-        "A grep/code audit shows no route-level/page-level gating uses the blocking actor initialization path.",
-        "On a stopped backend, navigating between Guest Area / Hotel Area / Guest Account / Account Status always results in a consistent diagnostics experience (no blank screen)."
+        "After a hotel confirms a booking, the booking remains visible in Hotel Area without requiring logout/login.",
+        "Hotel Area booking list supports filtering by status (Pending, Confirmed, Rejected, Cancelled) and/or a combined 'All' view.",
+        "The default Hotel Area booking view is not limited to only pending bookings."
       ]
     },
     {
       "id": "REQ-27",
-      "text": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
-      "target": "frontend",
+      "text": "Add hotel-configurable manual payment methods in Hotel Area that can be shared to guests: allow each hotel to save payment instructions (e.g., PayPal email, GoPay/DANA number, WhatsApp/contact text), and render the saved instructions inside the guest-facing Booking Payment Instructions after booking submission.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-1"
         ],
         "quotes": [
-          "Ya, semua kena"
+          "4. metode pembayaran di akun hotel yang bisa di share ke tamu."
         ]
       },
       "acceptanceCriteria": [
-        "When the raw error contains a canister ID, the UI displays it in a clearly labeled field that users can copy.",
-        "The default view shows a short, user-friendly message; raw technical details remain behind an explicit expand/collapse control.",
-        "All new/modified user-facing text is in English."
+        "Hotel Area provides a form to save and update the hotel's manual payment instructions (multiple methods supported, free-text notes supported).",
+        "Backend persists hotel payment instructions keyed by hotel principal and only allows the hotel owner/admin to modify them.",
+        "After a guest submits a booking, the payment instructions shown to the guest include the specific hotel's saved payment instructions (not only the global email).",
+        "If a hotel has not configured payment instructions, the guest sees a clear fallback message and the existing email-based flow still works."
       ]
     },
     {
       "id": "REQ-28",
-      "text": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
-      "target": "frontend",
+      "text": "Add currency selection support (minimum IDR and USD) for room pricing so room prices are not always displayed with a '$' prefix; store currency per room in the backend model and format prices correctly across all room and booking UI surfaces.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-1"
         ],
         "quotes": [
-          "Ya, semua kena"
+          "5. mata uang belum ada pilihan. Harusnya ada pilihan rupiah atau dollar."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/REGRESSION_CHECKLIST.md` includes a dedicated section/checklist for 'Backend stopped (IC0508)' validation.",
-        "Checklist steps are actionable and reference the actual UI entry points (Retry Connection, Hard Refresh, Open Troubleshooting Tools)."
+        "Room inventory includes a currency field (minimum IDR, USD) persisted in the backend.",
+        "Hotel Rooms Manager allows selecting the currency when creating/editing a room and validates that a currency is set.",
+        "Guest room browsing displays prices using correct currency formatting (e.g., IDR uses 'Rp' formatting; USD uses '$' formatting).",
+        "No UI path displays IDR amounts with a '$' prefix."
+      ]
+    },
+    {
+      "id": "REQ-29",
+      "text": "Add bilingual UI (Indonesian and English) with a language switcher and translate all current user-facing screens and key components, while ensuring English copy exists for all user-visible text introduced or modified by this build.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "6. multi bahasa indonesia - inggris"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A language switcher is available in the UI and persists the selected language across reloads.",
+        "Key screens are translated: Guest Area, Browse Hotels, Guest Account, Hotel Area (including bookings/rooms/subscription/payment sections), and booking dialogs/instructions.",
+        "All new/changed user-facing text added in this build is written in English and is also available in Indonesian via the i18n system.",
+        "Language switching does not require re-authentication and does not break routing or actor readiness gating."
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "text": "Create any necessary safe, conditional Motoko migration logic to upgrade existing persisted room inventory and booking records to include new fields (room currency, booking room type, hotel payment instructions) without trapping on legacy data.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "1. pilihan kamar yang belum ada jika mau booking di akun tamu.",
+          "4. metode pembayaran di akun hotel yang bisa di share ke tamu.",
+          "5. mata uang belum ada pilihan. Harusnya ada pilihan rupiah atau dollar."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Upgrading the canister from existing production state succeeds without traps.",
+        "Legacy room records default to a safe currency (explicitly defined) if missing.",
+        "Legacy bookings default to a safe 'unknown/unspecified room type' handling only if unavoidable; new bookings must always have a room type.",
+        "Legacy hotels without payment instructions return an empty/default structure (not null-trapping) from the relevant query APIs."
       ]
     }
   ],
   "constraints": [
-    "Respect single-actor backend architecture: all Motoko logic remains in `backend/main.mo`.",
-    "Do not edit any files under `frontend/src/components/ui` or any frontend paths listed in `frontend.immutablePaths` from SYSTEM_CONTEXT.",
-    "All user-facing text introduced/modified by this build must be in English."
+    "Backend must remain a single-actor Motoko architecture with all core logic in backend/main.mo.",
+    "Only create backend/migration.mo changes if required for upgrading existing stable state; migration must be conditional and must not trap on legacy/partial data.",
+    "Do not edit files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT; compose them instead.",
+    "Do not introduce third-party auth providers; use existing Internet Identity flow only.",
+    "Use English for all new/modified user-facing text, and provide Indonesian equivalents via the new i18n system."
   ],
   "nonGoals": [
-    "Do not implement new domain features (currency, room-type selection in bookings, reputation/rating, analytics, notifications) as part of this change.",
-    "Do not change guest-facing visibility/filtering rules for hotels (active + paid + not dummy/test remains the rule).",
-    "Do not add external services, databases, or non-Internet-Identity authentication."
+    "Implementing an online payment gateway or automatic payment verification (this remains manual).",
+    "Adding real-time features (e.g., WebSockets) for live availability updates.",
+    "Adding maps/GPS/location services integration beyond existing profile fields.",
+    "Adding new roles/permissions beyond the current Admin/Hotel/Guest model."
   ],
   "imageRequirements": {
     "required": [],

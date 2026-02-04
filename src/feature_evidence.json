@@ -2,10 +2,31 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-frontend-actor-readiness-gating-to-verify-backend-liveness-by-calling-the-new-backend-health-endpoint-after-actor-creation-inside-useactorsafe-and-treat-any-failure-timeout-rejection-replica-error-as-a-terminal-user-visible-connection-error-via-existing-diagnostics-ui-no-infinite-loading",
-      "featureTitle": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+      "featureId": "feature-add-required-room-type-selection-to-the-guest-booking-flow-so-a-guest-cannot-submit-a-booking-without-choosing-a-room-type-and-the-chosen-room-type-is-stored-and-displayed-in-both-guest-account-booking-history-and-hotel-area-booking-management",
+      "featureTitle": "Add required room-type selection to the guest booking flow so a guest cannot submit a booking without choosing a room type, and the chosen room type is stored and displayed in both Guest Account booking history and Hotel Area booking management.",
       "files": [
-        "frontend/src/hooks/useActorSafe.ts"
+        "frontend/src/components/bookings/BookingRequestDialog.tsx",
+        "frontend/src/pages/BrowseHotels.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-24"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-calendar-feature-for-booking-reservation-needs-provide-1-a-hotel-area-calendar-view-that-shows-booking-occupancy-over-time-and-2-an-availability-aware-date-selection-experience-in-the-guest-booking-dialog-using-backend-provided-booked-ranges",
+      "featureTitle": "Implement a calendar feature for booking/reservation needs: provide (1) a Hotel Area calendar view that shows booking occupancy over time and (2) an availability-aware date selection experience in the guest booking dialog using backend-provided booked ranges.",
+      "files": [
+        "frontend/src/components/bookings/BookingRequestDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -22,31 +43,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-no-app-route-depends-on-the-legacy-blocking-actor-hook-frontend-src-hooks-useactor-ts-for-initial-page-render-migrate-any-remaining-usage-in-pages-components-to-useactorsafe-requireactorready-so-a-stopped-backend-cannot-cause-cascading-failures-or-blank-panels",
-      "featureTitle": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
+      "featureId": "feature-add-hotel-configurable-manual-payment-methods-in-hotel-area-that-can-be-shared-to-guests-allow-each-hotel-to-save-payment-instructions-e-g-paypal-email-gopay-dana-number-whatsapp-contact-text-and-render-the-saved-instructions-inside-the-guest-facing-booking-payment-instructions-after-booking-submission",
+      "featureTitle": "Add hotel-configurable manual payment methods in Hotel Area that can be shared to guests: allow each hotel to save payment instructions (e.g., PayPal email, GoPay/DANA number, WhatsApp/contact text), and render the saved instructions inside the guest-facing Booking Payment Instructions after booking submission.",
       "files": [
-        "frontend/src/hooks/useBrowseHotels.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-26"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-improve-the-stopped-canister-diagnostics-message-english-ui-copy-to-include-1-the-detected-canister-id-if-present-in-the-error-text-2-a-clear-statement-that-the-backend-is-stopped-and-3-actionable-next-steps-for-the-operator-admin-retry-hard-refresh-open-troubleshooting-without-exposing-internal-stack-traces-by-default",
-      "featureTitle": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
-      "files": [
-        "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
-        "frontend/src/utils/replicaRejection.ts"
+        "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+        "frontend/src/components/bookings/BookingRequestDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -63,10 +64,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-lightweight-regression-test-plan-entry-update-frontend-regression-checklist-md-specifically-for-the-stopped-backend-scenario-to-verify-route-access-retry-behavior-troubleshooting-navigation-and-that-access-control-initialization-warnings-do-not-block-non-admin-user-flows-when-backend-is-healthy",
-      "featureTitle": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+      "featureId": "feature-add-currency-selection-support-minimum-idr-and-usd-for-room-pricing-so-room-prices-are-not-always-displayed-with-a-prefix-store-currency-per-room-in-the-backend-model-and-format-prices-correctly-across-all-room-and-booking-ui-surfaces",
+      "featureTitle": "Add currency selection support (minimum IDR and USD) for room pricing so room prices are not always displayed with a '$' prefix; store currency per room in the backend model and format prices correctly across all room and booking UI surfaces.",
       "files": [
-        "frontend/REGRESSION_CHECKLIST.md"
+        "frontend/src/components/hotel/HotelRoomsManager.tsx",
+        "frontend/src/pages/BrowseHotels.tsx",
+        "frontend/src/utils/formatCurrency.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -79,6 +82,35 @@
       ],
       "testIds": [
         "REQ-28"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-bilingual-ui-indonesian-and-english-with-a-language-switcher-and-translate-all-current-user-facing-screens-and-key-components-while-ensuring-english-copy-exists-for-all-user-visible-text-introduced-or-modified-by-this-build",
+      "featureTitle": "Add bilingual UI (Indonesian and English) with a language switcher and translate all current user-facing screens and key components, while ensuring English copy exists for all user-visible text introduced or modified by this build.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AppFooter.tsx",
+        "frontend/src/components/AppHeader.tsx",
+        "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+        "frontend/src/components/bookings/BookingRequestDialog.tsx",
+        "frontend/src/components/hotel/HotelRoomsManager.tsx",
+        "frontend/src/i18n/I18nProvider.tsx",
+        "frontend/src/i18n/i18n.ts",
+        "frontend/src/pages/BrowseHotels.tsx",
+        "frontend/src/pages/GuestArea.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-29"
       ],
       "confidence": "high"
     }

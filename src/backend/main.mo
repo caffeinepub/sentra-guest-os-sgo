@@ -10,11 +10,21 @@ import Time "mo:core/Time";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import InviteLinksModule "invite-links/invite-links-module";
+import Migration "migration";
+import List "mo:core/List";
 
+(with migration = Migration.run)
 actor {
   public type UserProfile = {
     name : Text;
     email : Text;
+  };
+
+  public type RoomCurrency = {
+    #IDR;
+    #USD;
+    #EUR;
+    #SGD;
   };
 
   public type RoomInventory = {
@@ -22,6 +32,7 @@ actor {
     pricePerNight : Nat;
     promo : ?Text;
     photos : [Text];
+    currency : RoomCurrency;
   };
 
   public type PaymentStatus = {
@@ -78,6 +89,7 @@ actor {
     country : Text;
     logo : ?Text;
     rooms : [RoomInventory];
+    payment_instructions : ?Text;
   };
 
   public type MapLocationWithPrincipal = {
@@ -123,6 +135,7 @@ actor {
     guest : Principal;
     hotel : Principal;
     hotelName : Text;
+    room_type : Text;
     checkInDate : Time.Time;
     checkOutDate : Time.Time;
     guests : Nat;
@@ -141,6 +154,7 @@ actor {
   public type CreateBookingInput = {
     guest : Principal;
     hotel : Principal;
+    room_type : Text;
     checkInDate : Time.Time;
     checkOutDate : Time.Time;
     guests : Nat;
@@ -583,11 +597,28 @@ actor {
   public shared ({ caller }) func createBookingRequest(input : CreateBookingInput) : async Nat {
     checkAuthenticated(caller);
 
-    // Only allow bookings for active hotels
-    checkHotelBookable(input.hotel);
+    // Only allow bookings for hotels that are visible to guests (isPaid, isActive, !isDummyHotel) or if they are dummy hotels in testing mode.
+    if (not isHotelVisibleToGuests(input.hotel, isTestingModeEnabled)) {
+      switch (hotelVisibility.get(input.hotel)) {
+        case (?visibility) {
+          if (visibility.isDummyHotel and not isTestingModeEnabled) {
+            Runtime.trap("Testing mode required: Booking test/dummy hotels requires testing mode. No real booking will be created.");
+          } else if (not visibility.isPaid) {
+            Runtime.trap("Unpaid Hotel: This hotel has not yet paid the onboarding fee. Please contact us if a hotel should be available.");
+          } else if (not visibility.isActive) {
+            Runtime.trap("Inactive Hotel: This hotel has not yet been activated. Please contact us if you think there is a mistake.");
+          } else {
+            Runtime.trap("Invalid hotel configuration");
+          };
+        };
+        case (_) {
+          Runtime.trap("Hotel not found: The hotel you selected could not be found.");
+        };
+      };
+    };
 
     let actualHotelName = switch (hotelProfiles.get(input.hotel)) {
-      case (null) { Runtime.trap("Invalid hotel: Hotel profile does not exist") };
+      case (null) { Runtime.trap("Hotel not found: The hotel you selected could not be found.") };
       case (?profile) { profile.name };
     };
 
@@ -600,7 +631,11 @@ actor {
     };
 
     if (input.checkOutDate <= input.checkInDate) {
-      Runtime.trap("Invalid check-out date: Must be after check-in date");
+      Runtime.trap("Invalid stay period: Check-out date must be after check-in date.");
+    };
+
+    if (input.room_type == "") {
+      Runtime.trap("Invalid room selection: Room type must be chosen when making a booking.");
     };
 
     let bookingRequest : BookingRequest = {
@@ -608,47 +643,7 @@ actor {
       guest = caller;
       hotel = input.hotel;
       hotelName = actualHotelName;
-      checkInDate = input.checkInDate;
-      checkOutDate = input.checkOutDate;
-      guests = input.guests;
-      status = #pending;
-      createdAt = Time.now();
-      lastUpdated = Time.now();
-    };
-
-    bookingRequests.add(nextId, bookingRequest);
-    nextId += 1;
-    bookingRequest.id;
-  };
-
-  public shared ({ caller }) func createBookingRequestWithTesting(input : CreateBookingInput) : async Nat {
-    checkAuthenticated(caller);
-
-    // Allow bookings for active hotels and testing mode hotels
-    checkHotelTesting(input.hotel);
-
-    let actualHotelName = switch (hotelProfiles.get(input.hotel)) {
-      case (null) { Runtime.trap("Invalid hotel: Hotel profile does not exist") };
-      case (?profile) { profile.name };
-    };
-
-    if (input.guests == 0) {
-      Runtime.trap("Invalid guests: Cannot create booking with 0 guests");
-    };
-
-    if (input.checkInDate < Time.now() + 100_000_000) {
-      Runtime.trap("Invalid check-in date: Must be in the future");
-    };
-
-    if (input.checkOutDate <= input.checkInDate) {
-      Runtime.trap("Invalid check-out date: Must be after check-in date");
-    };
-
-    let bookingRequest : BookingRequest = {
-      id = nextId;
-      guest = caller;
-      hotel = input.hotel;
-      hotelName = actualHotelName;
+      room_type = input.room_type;
       checkInDate = input.checkInDate;
       checkOutDate = input.checkOutDate;
       guests = input.guests;
@@ -870,18 +865,6 @@ actor {
   func checkHotelInventoryOwnership(requestor : Principal, owner : Principal) {
     if (requestor != owner) {
       Runtime.trap("Unauthorized: Can only access your own hotel inventory");
-    };
-  };
-
-  func checkHotelBookable(hotel : Principal) {
-    if (not isHotelBookable(hotel)) {
-      Runtime.trap("Unauthorized: This hotel is not available for booking");
-    };
-  };
-
-  func checkHotelTesting(hotel : Principal) {
-    if (not isHotelVisibleToGuests(hotel, isTestingModeEnabled)) {
-      Runtime.trap("Unauthorized: This hotel is not available for booking (testing mode may be off)");
     };
   };
 };

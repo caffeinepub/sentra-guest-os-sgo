@@ -2,21 +2,26 @@ import { useState } from 'react';
 import { useGetHotelProfile } from '../../hooks/useHotelProfile';
 import { useUpdateRoomInventory, useDeleteRoomInventory } from '../../hooks/useRoomInventory';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
+import { useI18n } from '../../i18n/I18nProvider';
+import { formatCurrency } from '../../utils/formatCurrency';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BedDouble, Plus, Edit, Trash2, Loader2, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../../utils/getErrorMessage';
-import type { RoomInventory } from '../../backend';
+import type { RoomInventory, RoomCurrency } from '../../backend';
+import { RoomCurrency as RoomCurrencyEnum } from '../../backend';
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
 export default function HotelRoomsManager() {
+  const { t } = useI18n();
   const { identity } = useInternetIdentity();
   const { data: profile, isLoading: profileLoading, isFetching: profileRefetching } = useGetHotelProfile();
   const updateRoom = useUpdateRoomInventory();
@@ -28,6 +33,7 @@ export default function HotelRoomsManager() {
   const [formData, setFormData] = useState({
     roomType: '',
     pricePerNight: '',
+    currency: RoomCurrencyEnum.IDR as RoomCurrency,
     promo: '',
     photos: [] as string[],
   });
@@ -96,13 +102,14 @@ export default function HotelRoomsManager() {
     const room: RoomInventory = {
       roomType: formData.roomType.trim(),
       pricePerNight: BigInt(price),
+      currency: formData.currency,
       promo: formData.promo.trim() || undefined,
       photos: formData.photos,
     };
 
     try {
       await updateRoom.mutateAsync({ hotelPrincipal, room });
-      toast.success(editingRoom ? 'Room updated successfully' : 'Room created successfully');
+      toast.success(editingRoom ? t('hotel.roomUpdated') : t('hotel.roomCreated'));
       handleCloseDialog();
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
@@ -115,6 +122,7 @@ export default function HotelRoomsManager() {
     setFormData({
       roomType: '',
       pricePerNight: '',
+      currency: RoomCurrencyEnum.IDR,
       promo: '',
       photos: [],
     });
@@ -127,6 +135,7 @@ export default function HotelRoomsManager() {
     setFormData({
       roomType: room.roomType,
       pricePerNight: room.pricePerNight.toString(),
+      currency: room.currency,
       promo: room.promo || '',
       photos: room.photos,
     });
@@ -140,13 +149,13 @@ export default function HotelRoomsManager() {
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete the room "${roomType}"?`)) {
+    if (!confirm(`${t('hotel.deleteRoomConfirm')} "${roomType}"?`)) {
       return;
     }
 
     try {
       await deleteRoom.mutateAsync({ hotelPrincipal, roomType });
-      toast.success('Room deleted successfully');
+      toast.success(t('hotel.roomDeleted'));
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
@@ -159,6 +168,7 @@ export default function HotelRoomsManager() {
     setFormData({
       roomType: '',
       pricePerNight: '',
+      currency: RoomCurrencyEnum.IDR,
       promo: '',
       photos: [],
     });
@@ -174,8 +184,6 @@ export default function HotelRoomsManager() {
   const rooms = profile?.rooms || [];
   const isEdit = editingRoom !== null;
 
-  // Only show loading spinner during initial load, not during refetch
-  // This prevents the dialog from unmounting while open
   const showLoadingSpinner = profileLoading && !profile;
 
   if (showLoadingSpinner) {
@@ -198,16 +206,16 @@ export default function HotelRoomsManager() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <BedDouble className="h-5 w-5" />
-                Room Inventory
+                {t('hotel.roomInventory')}
                 {profileRefetching && (
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 )}
               </CardTitle>
-              <CardDescription>Manage your hotel's room types and pricing</CardDescription>
+              <CardDescription>{t('hotel.manageRooms')}</CardDescription>
             </div>
             <Button className="gap-2" onClick={handleOpenCreateDialog}>
               <Plus className="h-4 w-4" />
-              Add Room
+              {t('hotel.addRoom')}
             </Button>
           </div>
         </CardHeader>
@@ -215,13 +223,13 @@ export default function HotelRoomsManager() {
           {rooms.length === 0 ? (
             <div className="text-center py-12">
               <BedDouble className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p className="text-lg font-medium text-muted-foreground mb-2">No rooms added yet</p>
+              <p className="text-lg font-medium text-muted-foreground mb-2">{t('hotel.noRoomsYet')}</p>
               <p className="text-sm text-muted-foreground mb-4">
-                Start by adding your first room type with photos and pricing
+                {t('hotel.addFirstRoom')}
               </p>
               <Button onClick={handleOpenCreateDialog} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add Your First Room
+                {t('hotel.addYourFirstRoom')}
               </Button>
             </div>
           ) : (
@@ -249,7 +257,7 @@ export default function HotelRoomsManager() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base">{room.roomType}</CardTitle>
                     <CardDescription className="text-lg font-semibold text-foreground">
-                      ${room.pricePerNight.toString()} / night
+                      {formatCurrency(room.pricePerNight, room.currency)} / night
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -266,7 +274,7 @@ export default function HotelRoomsManager() {
                         onClick={() => handleEdit(room)}
                       >
                         <Edit className="h-4 w-4" />
-                        Edit
+                        {t('common.edit')}
                       </Button>
                       <Button
                         variant="destructive"
@@ -280,7 +288,7 @@ export default function HotelRoomsManager() {
                         ) : (
                           <Trash2 className="h-4 w-4" />
                         )}
-                        Delete
+                        {t('common.delete')}
                       </Button>
                     </div>
                   </CardContent>
@@ -294,53 +302,73 @@ export default function HotelRoomsManager() {
       <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEdit ? 'Edit Room' : 'Create New Room'}</DialogTitle>
+            <DialogTitle>{isEdit ? t('hotel.editRoom') : t('hotel.createRoom')}</DialogTitle>
             <DialogDescription>
-              {isEdit ? 'Update room details and photos' : 'Add a new room type with photos and pricing'}
+              {isEdit ? t('hotel.updateRoomDetails') : t('hotel.addNewRoom')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="roomType">Room Type / Name *</Label>
+              <Label htmlFor="roomType">{t('hotel.roomTypeName')} *</Label>
               <Input
                 id="roomType"
                 value={formData.roomType}
                 onChange={(e) => setFormData((prev) => ({ ...prev, roomType: e.target.value }))}
-                placeholder="e.g., Deluxe Suite, Standard Room"
+                placeholder={t('hotel.roomTypePlaceholder')}
                 required
                 disabled={isEdit}
               />
               {isEdit && (
-                <p className="text-xs text-muted-foreground">Room type cannot be changed when editing</p>
+                <p className="text-xs text-muted-foreground">{t('hotel.roomTypeCannotChange')}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="pricePerNight">Price per Night *</Label>
-              <Input
-                id="pricePerNight"
-                type="number"
-                min="0"
-                value={formData.pricePerNight}
-                onChange={(e) => setFormData((prev) => ({ ...prev, pricePerNight: e.target.value }))}
-                placeholder="Enter price"
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pricePerNight">{t('hotel.pricePerNight')} *</Label>
+                <Input
+                  id="pricePerNight"
+                  type="number"
+                  min="0"
+                  value={formData.pricePerNight}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, pricePerNight: e.target.value }))}
+                  placeholder={t('hotel.enterPrice')}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="currency">{t('hotel.currency')} *</Label>
+                <Select
+                  value={formData.currency}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, currency: value as RoomCurrency }))}
+                >
+                  <SelectTrigger id="currency">
+                    <SelectValue placeholder={t('hotel.selectCurrency')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={RoomCurrencyEnum.IDR}>{t('currency.IDR')}</SelectItem>
+                    <SelectItem value={RoomCurrencyEnum.USD}>{t('currency.USD')}</SelectItem>
+                    <SelectItem value={RoomCurrencyEnum.EUR}>{t('currency.EUR')}</SelectItem>
+                    <SelectItem value={RoomCurrencyEnum.SGD}>{t('currency.SGD')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="promo">Promo Text (Optional)</Label>
+              <Label htmlFor="promo">{t('hotel.promoText')}</Label>
               <Textarea
                 id="promo"
                 value={formData.promo}
                 onChange={(e) => setFormData((prev) => ({ ...prev, promo: e.target.value }))}
-                placeholder="e.g., 20% off for early bookings"
+                placeholder={t('hotel.promoPlaceholder')}
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="photos">Room Photos *</Label>
+              <Label htmlFor="photos">{t('hotel.roomPhotos')} *</Label>
               <div className="space-y-3">
                 {formData.photos.length > 0 && (
                   <div className="grid grid-cols-2 gap-3">
@@ -375,7 +403,7 @@ export default function HotelRoomsManager() {
                   <ImageIcon className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Upload images (max 2MB each). You can add multiple photos.
+                  {t('hotel.uploadImages')}
                 </p>
                 {imageError && (
                   <Alert variant="destructive">
@@ -388,16 +416,16 @@ export default function HotelRoomsManager() {
 
             <DialogFooter className="gap-2">
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={updateRoom.isPending}>
                 {updateRoom.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isEdit ? 'Updating...' : 'Creating...'}
+                    {isEdit ? t('hotel.updating') : t('hotel.creating')}
                   </>
                 ) : (
-                  isEdit ? 'Update Room' : 'Create Room'
+                  isEdit ? t('hotel.updateRoomBtn') : t('hotel.createRoomBtn')
                 )}
               </Button>
             </DialogFooter>

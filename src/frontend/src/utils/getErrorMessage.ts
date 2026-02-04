@@ -44,9 +44,19 @@ export function getErrorMessage(error: unknown): string {
       return `Access denied: ${message}`;
     }
 
+    // Check for testing mode errors
+    if (message.includes('Testing mode required') || message.includes('testing mode')) {
+      return message;
+    }
+
+    // Check for hotel availability errors
+    if (message.includes('Unpaid Hotel') || message.includes('Inactive Hotel')) {
+      return message;
+    }
+
     // Check for date validation errors
-    if (message.includes('Invalid check-in date') || message.includes('Invalid check-out date')) {
-      return message.replace('Invalid check-in date:', 'Check-in date error:').replace('Invalid check-out date:', 'Check-out date error:');
+    if (message.includes('Invalid check-in date') || message.includes('Invalid check-out date') || message.includes('Invalid stay period')) {
+      return message;
     }
 
     // Check for validation errors
@@ -90,9 +100,19 @@ export function getErrorMessage(error: unknown): string {
       return `Request timed out. Please check your connection and try again.`;
     }
     
+    // Check for testing mode errors in string
+    if (error.includes('Testing mode required') || error.includes('testing mode')) {
+      return error;
+    }
+    
+    // Check for hotel availability errors in string
+    if (error.includes('Unpaid Hotel') || error.includes('Inactive Hotel')) {
+      return error;
+    }
+    
     // Check for date validation errors in string
-    if (error.includes('Invalid check-in date') || error.includes('Invalid check-out date')) {
-      return error.replace('Invalid check-in date:', 'Check-in date error:').replace('Invalid check-out date:', 'Check-out date error:');
+    if (error.includes('Invalid check-in date') || error.includes('Invalid check-out date') || error.includes('Invalid stay period')) {
+      return error;
     }
     
     return error;

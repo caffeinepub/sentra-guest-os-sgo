@@ -1,88 +1,154 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T10:46:00.128Z",
+  "generatedAt": "2026-02-04T11:32:04.167Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 4,
+    "total": 7,
+    "implemented": 5,
     "items": [
       {
         "id": "REQ-24",
-        "summary": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning a small, stable response (at minimum: a boolean `ok` plus a `timestamp` from `Time.now()`), and ensure it cannot trap for anonymous callers.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Add required room-type selection to the guest booking flow so a guest cannot submit a booking without choosing a room type, and the chosen room type is stored and displayed in both Guest Account booking history and Hotel Area booking management.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/bookings/BookingRequestDialog.tsx",
+          "frontend/src/pages/BrowseHotels.tsx",
+          "frontend/src/components/bookings/GuestBookingsSection.tsx",
+          "frontend/src/components/bookings/HotelBookingsSection.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/bookings/BookingRequestDialog.tsx",
+          "frontend/src/pages/BrowseHotels.tsx"
+        ]
       },
       {
         "id": "REQ-25",
-        "summary": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+        "summary": "Implement a calendar feature for booking/reservation needs: provide (1) a Hotel Area calendar view that shows booking occupancy over time and (2) an availability-aware date selection experience in the guest booking dialog using backend-provided booked ranges.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useActorSafe.ts",
-          "frontend/src/components/auth/RequireActorReady.tsx"
+          "frontend/src/pages/HotelArea.tsx",
+          "frontend/src/components/bookings/HotelAvailabilityCalendar.tsx",
+          "frontend/src/hooks/useAvailability.ts",
+          "frontend/src/components/bookings/BookingDatePickerField.tsx",
+          "frontend/src/components/bookings/BookingRequestDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useActorSafe.ts"
+          "frontend/src/components/bookings/BookingRequestDialog.tsx"
         ]
       },
       {
         "id": "REQ-26",
-        "summary": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
-        "status": "implemented",
+        "summary": "Fix Hotel Area booking history so bookings do not disappear after confirmation; provide a status filter (Pending / Confirmed / Rejected / Cancelled) and a default view that includes confirmed bookings.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/hooks/useBrowseHotels.ts",
-          "frontend/src/pages/BrowseHotels.tsx"
+          "frontend/src/hooks/useBookings.ts",
+          "frontend/src/components/bookings/HotelBookingsSection.tsx",
+          "frontend/src/pages/HotelArea.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/hooks/useBrowseHotels.ts"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-27",
-        "summary": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
+        "summary": "Add hotel-configurable manual payment methods in Hotel Area that can be shared to guests: allow each hotel to save payment instructions (e.g., PayPal email, GoPay/DANA number, WhatsApp/contact text), and render the saved instructions inside the guest-facing Booking Payment Instructions after booking submission.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/replicaRejection.ts",
-          "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
-          "frontend/src/utils/getErrorMessage.ts"
+          "frontend/src/components/payments/HotelManualPaymentInstructionsForm.tsx",
+          "frontend/src/pages/HotelArea.tsx",
+          "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+          "frontend/src/components/bookings/BookingRequestDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/replicaRejection.ts",
-          "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx"
+          "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+          "frontend/src/components/bookings/BookingRequestDialog.tsx"
         ]
       },
       {
         "id": "REQ-28",
-        "summary": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+        "summary": "Add currency selection support (minimum IDR and USD) for room pricing so room prices are not always displayed with a '$' prefix; store currency per room in the backend model and format prices correctly across all room and booking UI surfaces.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/REGRESSION_CHECKLIST.md"
+          "frontend/src/utils/formatCurrency.ts",
+          "frontend/src/components/hotel/HotelRoomsManager.tsx",
+          "frontend/src/components/hotel/GuestHotelRoomsDialog.tsx",
+          "frontend/src/pages/BrowseHotels.tsx"
         ],
         "matchedFiles": [
-          "frontend/REGRESSION_CHECKLIST.md"
+          "frontend/src/utils/formatCurrency.ts",
+          "frontend/src/components/hotel/HotelRoomsManager.tsx",
+          "frontend/src/pages/BrowseHotels.tsx"
         ]
+      },
+      {
+        "id": "REQ-29",
+        "summary": "Add bilingual UI (Indonesian and English) with a language switcher and translate all current user-facing screens and key components, while ensuring English copy exists for all user-visible text introduced or modified by this build.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/i18n/i18n.ts",
+          "frontend/src/i18n/I18nProvider.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/AppHeader.tsx",
+          "frontend/src/pages/GuestArea.tsx",
+          "frontend/src/pages/BrowseHotels.tsx",
+          "frontend/src/pages/GuestAccountPage.tsx",
+          "frontend/src/pages/HotelArea.tsx",
+          "frontend/src/components/bookings/BookingRequestDialog.tsx",
+          "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+          "frontend/src/components/bookings/GuestBookingsSection.tsx",
+          "frontend/src/components/bookings/HotelBookingsSection.tsx",
+          "frontend/src/components/hotel/HotelRoomsManager.tsx",
+          "frontend/src/components/hotel/GuestHotelRoomsDialog.tsx",
+          "frontend/src/components/AppFooter.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/i18n/i18n.ts",
+          "frontend/src/i18n/I18nProvider.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/AppHeader.tsx",
+          "frontend/src/pages/GuestArea.tsx",
+          "frontend/src/pages/BrowseHotels.tsx",
+          "frontend/src/components/bookings/BookingRequestDialog.tsx",
+          "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+          "frontend/src/components/hotel/HotelRoomsManager.tsx",
+          "frontend/src/components/AppFooter.tsx"
+        ]
+      },
+      {
+        "id": "REQ-30",
+        "summary": "Create any necessary safe, conditional Motoko migration logic to upgrade existing persisted room inventory and booking records to include new fields (room currency, booking room type, hotel payment instructions) without trapping on legacy data.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/REGRESSION_CHECKLIST.md",
+    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/AppFooter.tsx",
+    "frontend/src/components/AppHeader.tsx",
+    "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+    "frontend/src/components/bookings/BookingRequestDialog.tsx",
     "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
+    "frontend/src/components/hotel/HotelRoomsManager.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useActorSafe.ts",
-    "frontend/src/hooks/useBrowseHotels.ts",
-    "frontend/src/utils/replicaRejection.ts",
+    "frontend/src/i18n/I18nProvider.tsx",
+    "frontend/src/i18n/i18n.ts",
+    "frontend/src/pages/AdminPanelPage.tsx",
+    "frontend/src/pages/BrowseHotels.tsx",
+    "frontend/src/pages/GuestArea.tsx",
+    "frontend/src/utils/formatCurrency.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -153,7 +153,7 @@ function AdminPanelContent() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button asChild variant="default">
-                  <Link to="/account">
+                  <Link to="/account-status">
                     View Account Status
                   </Link>
                 </Button>

@@ -1,13 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Make the app resilient when the backend canister is stopped by adding an explicit backend health check and ensuring the frontend consistently surfaces a clear diagnostics state instead of partial renders or infinite loading.
+**Goal:** Improve the booking experience and hotel management by adding required room-type selection, availability/calendar support, persistent booking history with status filters, shareable hotel payment instructions, correct currency handling, and a bilingual (ID/EN) UI.
 
 **Planned changes:**
-- Add a public, anonymous-safe backend query endpoint (e.g., `health()`) in `backend/main.mo` that returns a stable response including `ok` and a `timestamp` from `Time.now()`.
-- Update `useActorSafe` to verify backend liveness by calling the new health endpoint after actor creation, and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via the existing diagnostics UI (no infinite loading).
-- Migrate any remaining route/page-level usage of the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause blank panels or cascading failures.
-- Improve the stopped-canister diagnostics English copy to (a) show detected canister ID when present, (b) clearly state the backend is stopped, and (c) provide actionable next steps (retry, hard refresh, open troubleshooting), while keeping raw technical details behind an expand/collapse control.
-- Update `frontend/REGRESSION_CHECKLIST.md` with a dedicated “Backend stopped (IC0508)” checklist covering route access, retry behavior, troubleshooting navigation, and confirming access-control initialization warnings do not block normal flows when backend is healthy.
+- Add a required “Room type” field to the guest booking flow, sourced from the hotel’s room inventory, and store/display it in both guest booking history and hotel booking management.
+- Add a Hotel Area calendar/availability view showing booking occupancy over time, and update the guest booking date selection to prevent/stop conflicting date ranges using backend-provided booked ranges.
+- Fix Hotel Area booking history so confirmed bookings remain visible immediately; add a booking status filter (Pending / Confirmed / Rejected / Cancelled) with a default view that includes confirmed bookings.
+- Add hotel-configurable manual payment methods/instructions in Hotel Area and show those instructions to guests after booking submission (with a clear fallback if none are configured).
+- Add currency selection (minimum IDR and USD) for room pricing, persist currency per room, and format prices correctly across room browsing and booking UI.
+- Add bilingual UI (Indonesian/English) with a language switcher that persists across reloads; translate key screens and ensure all new/changed text has EN + ID via the i18n system.
+- Add safe conditional backend migration logic to support new fields (room currency, booking room type, hotel payment instructions) without trapping on legacy data.
 
-**User-visible outcome:** When the backend canister is stopped, all relevant routes consistently show a clear diagnostics error card (with optional expandable technical details and a copyable canister ID when available) and the app never gets stuck in infinite loading; when the backend is healthy, access-control initialization failures only warn and do not block general usage.
+**User-visible outcome:** Guests must select a room type and can pick dates that respect availability; guests see correct room prices (IDR/USD) and receive the hotel’s specific payment instructions after booking. Hotel users can view a calendar of occupancy, filter booking history by status (including confirmed), and manage payment instructions. The UI can be switched between Indonesian and English.

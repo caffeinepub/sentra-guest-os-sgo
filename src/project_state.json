@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 282,
-  "summary": "Aplikasi booking & reservasi hotel \"Sentra Guest OS (SGO)\" (React frontend + Motoko backend) dengan autentikasi Internet Identity/Principal ID, pemisahan area tamu vs hotel, onboarding hotel via invite link sekali pakai, serta mode pembayaran manual via email. Baseline akses inti (Admin Panel, Hotel Area, Guest Account) sempat distabilkan (v22), lalu Step 3 booking/reservasi dasar dikerjakan (draft/live v23) dan dilanjutkan kontrol operasional untuk hotel demo/test + visibilitas (TEST/DUMMY, active/inactive) serta skema hotel subscription bulanan (admin dapat menonaktifkan hotel yang tidak membayar). Setelah rangkaian perbaikan backend untuk section Admin Panel \"Hotel Visibility & Subscription Management\" yang sebelumnya loading lalu blank, pengguna mengonfirmasi panel admin kini sudah muncul kembali (v36).",
+  "projectStateVersion": 295,
+  "summary": "Aplikasi booking & reservasi hotel \"Sentra Guest OS (SGO)\" (React frontend + Motoko backend) dengan autentikasi Internet Identity/Principal ID, pemisahan area tamu vs hotel, onboarding hotel via invite link sekali pakai, serta mode pembayaran manual via email. Baseline akses inti (Admin Panel, Hotel Area, Guest Account) telah distabilkan (v22). Admin Panel sempat blank pada section \"Hotel Visibility & Subscription Management\" namun sudah pulih dan stabil kembali setelah perbaikan backend (v36). Booking/reservasi dasar kini sudah berfungsi dan dapat diproses/di-konfirmasi (v47).",
   "existing_features": [
     {
       "id": "IF-1",
@@ -407,34 +407,42 @@
       "version": 1
     },
     {
-      "id": "feature-update-frontend-actor-readiness-gating-to-verify-backend-liveness-by-calling-the-new-backend-health-endpoint-after-actor-creation-inside-useactorsafe-and-treat-any-failure-timeout-rejection-replica-error-as-a-terminal-user-visible-connection-error-via-existing-diagnostics-ui-no-infinite-loading",
-      "title": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+      "id": "feature-add-required-room-type-selection-to-the-guest-booking-flow-so-a-guest-cannot-submit-a-booking-without-choosing-a-room-type-and-the-chosen-room-type-is-stored-and-displayed-in-both-guest-account-booking-history-and-hotel-area-booking-management",
+      "title": "Add required room-type selection to the guest booking flow so a guest cannot submit a booking without choosing a room type, and the chosen room type is stored and displayed in both Guest Account booking history and Hotel Area booking management.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-calendar-feature-for-booking-reservation-needs-provide-1-a-hotel-area-calendar-view-that-shows-booking-occupancy-over-time-and-2-an-availability-aware-date-selection-experience-in-the-guest-booking-dialog-using-backend-provided-booked-ranges",
+      "title": "Implement a calendar feature for booking/reservation needs: provide (1) a Hotel Area calendar view that shows booking occupancy over time and (2) an availability-aware date selection experience in the guest booking dialog using backend-provided booked ranges.",
       "reqIds": [
         "REQ-25"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-no-app-route-depends-on-the-legacy-blocking-actor-hook-frontend-src-hooks-useactor-ts-for-initial-page-render-migrate-any-remaining-usage-in-pages-components-to-useactorsafe-requireactorready-so-a-stopped-backend-cannot-cause-cascading-failures-or-blank-panels",
-      "title": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-the-stopped-canister-diagnostics-message-english-ui-copy-to-include-1-the-detected-canister-id-if-present-in-the-error-text-2-a-clear-statement-that-the-backend-is-stopped-and-3-actionable-next-steps-for-the-operator-admin-retry-hard-refresh-open-troubleshooting-without-exposing-internal-stack-traces-by-default",
-      "title": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
+      "id": "feature-add-hotel-configurable-manual-payment-methods-in-hotel-area-that-can-be-shared-to-guests-allow-each-hotel-to-save-payment-instructions-e-g-paypal-email-gopay-dana-number-whatsapp-contact-text-and-render-the-saved-instructions-inside-the-guest-facing-booking-payment-instructions-after-booking-submission",
+      "title": "Add hotel-configurable manual payment methods in Hotel Area that can be shared to guests: allow each hotel to save payment instructions (e.g., PayPal email, GoPay/DANA number, WhatsApp/contact text), and render the saved instructions inside the guest-facing Booking Payment Instructions after booking submission.",
       "reqIds": [
         "REQ-27"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-lightweight-regression-test-plan-entry-update-frontend-regression-checklist-md-specifically-for-the-stopped-backend-scenario-to-verify-route-access-retry-behavior-troubleshooting-navigation-and-that-access-control-initialization-warnings-do-not-block-non-admin-user-flows-when-backend-is-healthy",
-      "title": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+      "id": "feature-add-currency-selection-support-minimum-idr-and-usd-for-room-pricing-so-room-prices-are-not-always-displayed-with-a-prefix-store-currency-per-room-in-the-backend-model-and-format-prices-correctly-across-all-room-and-booking-ui-surfaces",
+      "title": "Add currency selection support (minimum IDR and USD) for room pricing so room prices are not always displayed with a '$' prefix; store currency per room in the backend model and format prices correctly across all room and booking UI surfaces.",
       "reqIds": [
         "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-bilingual-ui-indonesian-and-english-with-a-language-switcher-and-translate-all-current-user-facing-screens-and-key-components-while-ensuring-english-copy-exists-for-all-user-visible-text-introduced-or-modified-by-this-build",
+      "title": "Add bilingual UI (Indonesian and English) with a language switcher and translate all current user-facing screens and key components, while ensuring English copy exists for all user-visible text introduced or modified by this build.",
+      "reqIds": [
+        "REQ-29"
       ],
       "version": 1
     }
@@ -752,15 +760,29 @@
     },
     {
       "id": "AR-74",
-      "summary": "Perluas manajemen kamar (room inventory) di akun hotel: input/edit room type, upload foto kamar, harga, dan kolom promo; serta pastikan bisa diedit stabil tanpa flicker.",
+      "summary": "Perbaiki riwayat booking di Hotel Area: booking yang sudah dikonfirmasi tidak boleh hilang; sediakan tampilan/filtrasi status (Pending/Confirmed/Rejected/Canceled) agar hotel tetap bisa melihat booking yang sudah diproses",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-75",
-      "summary": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning a small, stable response (at minimum: a boolean `ok` plus a `timestamp` from `Time.now()`), and ensure it cannot trap for anonymous callers.",
+      "summary": "Tambahkan metode pembayaran di akun hotel yang bisa dibagikan ke tamu (manual): hotel mengisi info pembayaran/kontak (mis. PayPal/GoPay/DANA/WA) lalu info tersebut tampil di instruksi pembayaran booking untuk tamu",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-78",
+      "summary": "Fix Hotel Area booking history so bookings do not disappear after confirmation; provide a status filter (Pending / Confirmed / Rejected / Cancelled) and a default view that includes confirmed bookings.",
       "reqIds": [
-        "REQ-24"
+        "REQ-26"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-82",
+      "summary": "Create any necessary safe, conditional Motoko migration logic to upgrade existing persisted room inventory and booking records to include new fields (room currency, booking room type, hotel payment instructions) without trapping on legacy data.",
+      "reqIds": [
+        "REQ-30"
       ],
       "status": "pending"
     }
@@ -832,7 +854,7 @@
     "Ditambahkan fondasi 'room inventory/room types' di frontend (HotelRoomsManager + GuestHotelRoomsDialog + useRoomInventory) sebagai basis fitur pilihan kamar pada booking; perlu verifikasi integrasi end-to-end ke domain booking di backend bila belum tersambung.",
     "Sinkronisasi/upgrade build-template & core infrastructure: component:authorization v4.0.0, component:invite-links v3.0.0, component:core-infrastructure v1.0.2, termasuk pembaruan Dockerfile/deploy scripts/ICP config/pnpm workspace untuk stabilitas build & deploy.",
     "Pipeline aset PWA/logo kini mencakup skrip prune/resize image di build-template dan menghasilkan ikon PWA ter-standar (apple-touch-icon, maskable, dll) yang disimpan di frontend/public/assets/generated.",
-    "Tambahkan health-check/guard pasca-deploy untuk memastikan backend canister RUNNING (bukan STOPPED) sebelum UI menganggap aplikasi siap; jika STOPPED tampilkan error state yang jelas dan hindari infinite loading di seluruh panel."
+    "Keputusan fitur lanjutan (pengerjaan rumah): (1) pilihan kamar saat booking (room types wajib dipilih), (2) kalender booking, (3) riwayat booking di Hotel Area tidak hilang setelah konfirmasi, (4) metode pembayaran hotel yang bisa dibagikan ke tamu (manual), (5) pilihan mata uang IDR/USD untuk harga kamar, (6) multi-bahasa ID/EN."
   ],
   "known_issues": [
     "Pengguna melaporkan aplikasi belum terasa siap digunakan: fitur multi-bahasa belum tersedia/aktif meskipun requirement international-ready sejak awal.",
@@ -885,11 +907,12 @@
     "(v29 / terbaru) Admin Panel masih infinite loading (tidak bisa dibuka) meskipun sudah deploy berulang; stabilitas akses admin belum terbukti dan user khawatir kredit habis sebelum masalah selesai.",
     "Scope terbaru dari user: Hotel Area (termasuk tampilan foto/logo) sudah OK; prioritas masalah/fitur yang belum: Akun Tamu, kalender, dashboard analitik, notifikasi email, dan pilihan kamar—dengan syarat tidak boleh mengganggu Panel Admin yang sudah stabil.",
     "User melaporkan setelah aktivasi booking (v40), tamu masih belum bisa melakukan booking; user menduga penyebabnya karena hotel yang terlihat adalah hotel dummy/test. Perlu investigasi kondisi/aturan yang memblok booking pada hotel test/dummy vs hotel aktif, serta entry point UI booking dari Browse Hotels.",
-    "Booking masih gagal (failed) saat tamu sudah memilih tanggal check-in/check-out namun submit booking error/tidak bisa diproses; perlu fokus perbaikan booking end-to-end.",
     "Bug tampilan mata uang harga kamar: input harga IDR (mis. 800000) tampil ke tamu sebagai $800000 sehingga berpotensi salah paham; butuh dukungan currency yang benar/fleksibel.",
     "Alur booking belum menyertakan room type yang dipilih: tamu tidak tahu tipe kamar yang dibooking dan hotel juga tidak tahu pilihan kamar pada booking; UI seleksi kamar/indikator (ceklist) belum memadai untuk multi-room.",
     "Deployment/build terbaru gagal: muncul status \"Deployment didn't complete\" dengan \"Deployment error\" saat mencoba deploy perubahan terkait perbaikan booking failed + dukungan multi-mata uang harga kamar.",
-    "(v45+ terbaru) Seluruh aplikasi terdampak 'Backend Temporarily Unavailable / Canister ... is stopped (IC0508)': Admin Panel, Hotel Area, Guest Account, Account Status, dan booking semuanya gagal karena backend canister STOPPED setelah deploy."
+    "(v46 / terbaru) User melaporkan tidak ada perubahan sama sekali setelah deploy; indikasi perbaikan (termasuk upaya mengatasi backend stopped / warning) belum berdampak di sisi user atau regresi masih terjadi.",
+    "Riwayat booking di Hotel Area: setelah booking dikonfirmasi, entri booking menghilang (kemungkinan karena filter hanya menampilkan status tertentu atau invalidation/refetch bermasalah).",
+    "Metode pembayaran untuk booking masih belum dapat dibagikan/ditampilkan dari sisi hotel ke tamu secara konsisten (info pembayaran masih terpusat/umum), sehingga tamu tidak mendapat detail pembayaran yang spesifik per hotel."
   ],
   "isFixRequest": true,
   "generatedImages": [

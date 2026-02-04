@@ -1,52 +1,116 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T10:46:00.076Z",
-  "summary": "Diff implements frontend health-verified actor initialization (with bounded timeouts and non-blocking access-control init), adds stopped-canister (IC0508) diagnostics parsing + improved UI copy/actions, and updates regression checklist for the stopped-backend scenario. Backend diff evidence shows only a new HealthStatus type; the actual public query `health()` endpoint is not visible in the provided backend truncation, so REQ-24 cannot be confirmed from this diff summary alone. There are also unrelated frontend content/UX changes (e.g., payment instruction recipient updates) that were not requested.",
+  "generatedAt": "2026-02-04T11:32:04.116Z",
+  "summary": "Diff implements core data-model changes for room currency, booking room type, and hotel payment instructions (plus a migration), and adds a frontend i18n provider with a language switcher. However, several requested end-to-end behaviors are either only partially implemented or not evidenced (calendar/availability APIs and UI, hotel booking history filters/visibility, guest display of hotel-specific payment instructions, and comprehensive bilingualization).",
   "missing_requirements": [
     {
       "id": "REQ-24",
-      "requirement": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning at minimum `{ ok: Bool; timestamp: Time.now() }`, callable by anonymous users without trapping, with a stable response shape.",
-      "reason": "The diff summary for `backend/main.mo` only shows the new `HealthStatus` type definition; it does not show an exported `public query func health()` (or equivalent) implementation. Since the file is truncated, this may exist but is not evidenced in the provided snippet.",
+      "requirement": "Display the selected room type in both Guest Account booking history and Hotel Area booking management lists.",
+      "reason": "The diff shows the booking dialog requires a room type and the backend model stores `room_type`, but there is no evidence in the provided diff summary that guest booking cards and hotel booking cards were updated to render the stored room type.",
       "evidence": [
+        "frontend/src/components/bookings/BookingRequestDialog.tsx",
         "backend/main.mo"
       ]
     },
     {
-      "id": "REQ-26",
-      "requirement": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate remaining usage to `useActorSafe` + `RequireActorReady`.",
-      "reason": "The diff shows some hooks/pages moving to `useActorSafe` (e.g., `useBrowseHotels.ts`) and mentions route wrapping in a file summary, but it does not provide evidence of removing/migrating all route-level usage of the legacy `useActor.ts` hook across the codebase (no grep/audit evidence, and no changes to `frontend/src/hooks/useActor.ts` are shown).",
+      "id": "REQ-25",
+      "requirement": "Hotel Area calendar/availability view showing booking occupancy over time, filterable by room type, and guest booking date selection that prevents/blocks conflicting ranges using backend-provided booked ranges.",
+      "reason": "HotelArea is described as having a calendar \"placeholder\", but there is no evidence of a backend query API returning booked date ranges by hotel/room type/window, nor evidence that the guest date picker is wired to availability data to block conflicts.",
       "evidence": [
-        "frontend/src/hooks/useBrowseHotels.ts",
-        "frontend-file-summaries.txt"
+        "frontend-file-summaries.txt (HotelArea calendar placeholder)",
+        "frontend/src/components/bookings/BookingRequestDialog.tsx (uses BookingDatePickerField but no availability API shown)",
+        "backend/main.mo (no booked-ranges query shown in truncated diff)"
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "requirement": "Fix Hotel Area booking history so confirmed bookings remain visible after confirmation; add status filter (Pending/Confirmed/Rejected/Cancelled) with default including confirmed bookings.",
+      "reason": "No evidence in the diff summary shows updates to the Hotel Area bookings list behavior, cache invalidation/refetch after confirmation, or any status filter UI and default view logic.",
+      "evidence": [
+        "frontend-file-summaries.txt (mentions HotelArea tabs but does not evidence booking filter/confirmed default behavior)"
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "requirement": "Render the specific hotel's saved manual payment instructions in the guest-facing Booking Payment Instructions after booking submission, with a fallback if none are configured.",
+      "reason": "Backend adds `payment_instructions` to `HotelProfile`, but the guest-facing `BookingPaymentInstructions` shown still uses only a global email flow in the visible portion; no evidence shows it fetching and rendering `payment_instructions` or showing a specific fallback message for missing hotel instructions.",
+      "evidence": [
+        "backend/main.mo (HotelProfile has payment_instructions)",
+        "frontend/src/components/bookings/BookingPaymentInstructions.tsx"
+      ]
+    },
+    {
+      "id": "REQ-28",
+      "requirement": "Ensure currency is formatted correctly across all room and booking UI surfaces (minimum IDR and USD) and that no UI path shows IDR with a '$' prefix.",
+      "reason": "Currency support is added to the backend model and there is a new `formatCurrency` utility plus HotelRoomsManager currency selection, but the diff summary does not provide evidence that all guest browsing/booking/history UI surfaces use `formatCurrency` consistently (e.g., Browse Hotels room cards, booking summaries, etc.).",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/utils/formatCurrency.ts",
+        "frontend/src/components/hotel/HotelRoomsManager.tsx",
+        "frontend/src/pages/BrowseHotels.tsx (not showing price rendering changes in provided excerpt)"
+      ]
+    },
+    {
+      "id": "REQ-29",
+      "requirement": "Translate all key screens and ensure all new/modified user-facing text is in English and also available in Indonesian via the i18n system; persist language across reloads.",
+      "reason": "Language switcher + i18n provider/dictionaries are present, but multiple modified components still contain hardcoded English user-facing strings not routed through `t()` (e.g., GuestArea cards, BookingRequestDialog validation messages, diagnostics card defaults, toasts). Also, Indonesian dictionary content is truncated so full coverage cannot be verified from the diff summary.",
+      "evidence": [
+        "frontend/src/components/AppHeader.tsx",
+        "frontend/src/i18n/i18n.ts",
+        "frontend/src/pages/GuestArea.tsx (e.g., \"Welcome back!\", \"Secure & Decentralized\" etc.)",
+        "frontend/src/components/bookings/BookingRequestDialog.tsx (e.g., \"Check-in date is required\")",
+        "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx (default title/description strings)",
+        "frontend/src/components/bookings/BookingPaymentInstructions.tsx (toast success string)"
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "requirement": "Backend must enforce that new bookings always have a room type; legacy bookings should only default to unknown/unspecified if unavoidable.",
+      "reason": "Migration sets legacy `room_type` to an empty string, and the frontend blocks submission without a room type, but there is no evidence in the backend booking creation logic (not shown in the truncated diff) that it rejects/validates missing `room_type` for new bookings.",
+      "evidence": [
+        "backend/migration.mo (sets room_type = \"\")",
+        "backend/main.mo (CreateBookingInput includes room_type, but create-booking validation not evidenced in truncated diff)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Updated payment instruction recipient details (e.g., PayPal email and DANA/GoPay numbers) and added/modified WhatsApp admin contact in Hotel Area/payment-related UI.",
-      "reason": "BuildRequest is focused on backend health verification and stopped-canister diagnostics stabilization; changing payment recipient/contact details is unrelated and risks introducing new domain/operational behavior outside the requested scope.",
+      "description": "Added support for additional currencies (EUR, SGD) beyond the requested minimum (IDR, USD).",
+      "reason": "REQ-28 requires at minimum IDR and USD; diff expands enum and formatting to EUR/SGD without the request explicitly asking for them.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "backend/main.mo (RoomCurrency includes #EUR #SGD)",
+        "backend/migration.mo (NewRoomInventory currency includes #EUR #SGD)",
+        "frontend/src/utils/formatCurrency.ts (handles EUR/SGD)"
       ]
     },
     {
-      "description": "Broader admin/payment UI copy/localization and table UX changes (e.g., admin payment review panel English localization and mobile table behavior) beyond stopped-backend diagnostics.",
-      "reason": "Not requested by REQ-24..REQ-28; these appear to be general UI enhancements unrelated to backend-stopped stabilization.",
+      "description": "Admin verification watchdog/timeout and enhanced diagnostics behaviors not requested.",
+      "reason": "BuildRequest does not mention adding admin verification timeouts/watchdogs or expanding diagnostics error handling; these appear as additional features.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/src/pages/AdminPanelPage.tsx (watchdog timeout logic)",
+        "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx (stopped-canister analysis, extra diagnostics UI)"
       ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.63,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/REGRESSION_CHECKLIST.md",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AppFooter.tsx",
+    "frontend/src/components/AppHeader.tsx",
+    "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
+    "frontend/src/components/bookings/BookingRequestDialog.tsx",
     "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
-    "frontend/src/hooks/useActorSafe.ts",
-    "frontend/src/hooks/useBrowseHotels.ts",
-    "frontend/src/utils/replicaRejection.ts",
+    "frontend/src/components/hotel/HotelRoomsManager.tsx",
+    "frontend/src/i18n/I18nProvider.tsx",
+    "frontend/src/i18n/i18n.ts",
+    "frontend/src/pages/AdminPanelPage.tsx",
+    "frontend/src/pages/BrowseHotels.tsx",
+    "frontend/src/pages/GuestArea.tsx",
+    "frontend/src/utils/formatCurrency.ts",
     "project_state.json"
   ]
 }

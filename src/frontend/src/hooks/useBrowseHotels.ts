@@ -6,11 +6,11 @@ import type { HotelProfile, HotelProfileWithPrincipal } from '../backend';
 // Admin panels should use admin-specific hooks from useHotelVisibilityAdmin.ts
 // that use useActorSafe with timeout protection.
 
-export function useGetAllHotelsWithPrincipals(isTestingMode: boolean = false) {
+export function useGetAllHotelsWithPrincipals(effectiveTestingMode: boolean = false) {
   const { actor, actorLoading, actorError } = useActorSafe();
 
   const query = useQuery<HotelProfileWithPrincipal[]>({
-    queryKey: ['allHotelsWithPrincipals', isTestingMode],
+    queryKey: ['allHotelsWithPrincipals', effectiveTestingMode],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       return await actor.getAllHotelsWithPrincipals();
@@ -36,11 +36,11 @@ export function useGetAllHotelsWithPrincipals(isTestingMode: boolean = false) {
   };
 }
 
-export function useGetAllHotels(isTestingMode: boolean = false) {
+export function useGetAllHotels(effectiveTestingMode: boolean = false) {
   const { actor, actorLoading, actorError } = useActorSafe();
 
   const query = useQuery<HotelProfile[]>({
-    queryKey: ['allHotels', isTestingMode],
+    queryKey: ['allHotels', effectiveTestingMode],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       // Fetch with principals and extract profiles for backward compatibility
@@ -68,11 +68,11 @@ export function useGetAllHotels(isTestingMode: boolean = false) {
   };
 }
 
-export function useGetHotelsByCountry(country: string, isTestingMode: boolean = false) {
+export function useGetHotelsByCountry(country: string, effectiveTestingMode: boolean = false) {
   const { actor, actorLoading, actorError } = useActorSafe();
 
   const query = useQuery<HotelProfile[]>({
-    queryKey: ['hotelsByCountry', country, isTestingMode],
+    queryKey: ['hotelsByCountry', country, effectiveTestingMode],
     queryFn: async () => {
       if (!actor || !country) return [];
       return await actor.getHotelsByCountry(country);

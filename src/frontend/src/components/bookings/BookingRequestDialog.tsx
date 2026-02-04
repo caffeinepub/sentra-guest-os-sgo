@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCreateBooking } from '../../hooks/useBookings';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useActorSafe } from '../../hooks/useActorSafe';
+import { useI18n } from '../../i18n/I18nProvider';
 import {
   Dialog,
   DialogContent,
@@ -14,31 +15,35 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Calendar, Users, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Calendar, Users, Loader2, CheckCircle2, AlertCircle, RefreshCw, BedDouble } from 'lucide-react';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import BookingPaymentInstructions from './BookingPaymentInstructions';
 import BookingDatePickerField from './BookingDatePickerField';
 import type { Principal } from '@icp-sdk/core/principal';
+import type { RoomInventory } from '../../backend';
 
 interface BookingRequestDialogProps {
   hotelName: string;
   hotelPrincipal: Principal;
-  isTestingMode?: boolean;
+  rooms: RoomInventory[];
   trigger?: React.ReactNode;
 }
 
 export default function BookingRequestDialog({
   hotelName,
   hotelPrincipal,
-  isTestingMode = false,
+  rooms,
   trigger,
 }: BookingRequestDialogProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [checkInDate, setCheckInDate] = useState<Date | undefined>(undefined);
   const [checkOutDate, setCheckOutDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState('2');
+  const [selectedRoomType, setSelectedRoomType] = useState<string>('');
   const [bookingId, setBookingId] = useState<bigint | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -46,11 +51,12 @@ export default function BookingRequestDialog({
     checkInDate?: string;
     checkOutDate?: string;
     guests?: string;
+    roomType?: string;
   }>({});
 
   const { identity } = useInternetIdentity();
   const { actorReady, actorError, retry: retryActor } = useActorSafe();
-  const createBooking = useCreateBooking(isTestingMode);
+  const createBooking = useCreateBooking();
 
   const isAuthenticated = !!identity;
 
@@ -58,11 +64,15 @@ export default function BookingRequestDialog({
     const errors: typeof validationErrors = {};
     let isValid = true;
 
+    if (!selectedRoomType) {
+      errors.roomType = t('booking.roomRequired');
+      isValid = false;
+    }
+
     if (!checkInDate) {
       errors.checkInDate = 'Check-in date is required';
       isValid = false;
     } else {
-      // Backend requires check-in to be in the future (at least tomorrow)
       const tomorrow = new Date();
       tomorrow.setHours(0, 0, 0, 0);
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -123,7 +133,6 @@ export default function BookingRequestDialog({
       return;
     }
 
-    // Convert dates to UTC midnight to avoid timezone issues
     const checkInUTC = new Date(Date.UTC(
       checkInDate.getFullYear(),
       checkInDate.getMonth(),
@@ -144,31 +153,27 @@ export default function BookingRequestDialog({
       const id = await createBooking.mutateAsync({
         guest: identity!.getPrincipal(),
         hotel: hotelPrincipal,
+        room_type: selectedRoomType,
         checkInDate: BigInt(checkIn),
         checkOutDate: BigInt(checkOut),
         guests: BigInt(guests),
       });
       setBookingId(id);
       setShowInstructions(true);
-      toast.success(`Booking request created! Reference ID: ${id.toString()}`);
+      toast.success(`${t('booking.bookingSubmitted')}! ${t('booking.bookingId')}: ${id.toString()}`);
     } catch (error: unknown) {
       console.error('Failed to create booking:', error);
       
-      // Normalize error through getErrorMessage to ensure no internal runtime strings leak
       let errorMessage: string;
       try {
         errorMessage = getErrorMessage(error);
       } catch (normalizationError) {
-        // If error normalization itself fails, use a safe fallback
         console.error('Error normalization failed:', normalizationError);
         errorMessage = 'An unexpected error occurred. Please try again or contact support.';
       }
       
-      // Keep the dialog open and show the error inline
       setBookingError(errorMessage);
       toast.error(errorMessage);
-      
-      // Do NOT close the dialog or reset form state - let the user retry or edit inputs
     }
   };
 
@@ -178,6 +183,7 @@ export default function BookingRequestDialog({
       setCheckInDate(undefined);
       setCheckOutDate(undefined);
       setGuests('2');
+      setSelectedRoomType('');
       setBookingId(null);
       setShowInstructions(false);
       setBookingError(null);
@@ -190,12 +196,10 @@ export default function BookingRequestDialog({
     await retryActor();
   };
 
-  // Get tomorrow's date for minimum check-in validation
   const tomorrow = new Date();
   tomorrow.setHours(0, 0, 0, 0);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Get minimum checkout date (day after check-in)
   const minCheckOutDate = checkInDate ? new Date(checkInDate.getTime() + 86400000) : new Date(tomorrow.getTime() + 86400000);
 
   return (
@@ -203,7 +207,7 @@ export default function BookingRequestDialog({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="default" size="sm">
-            Request Booking
+            {t('booking.requestBooking')}
           </Button>
         )}
       </DialogTrigger>
@@ -216,9 +220,9 @@ export default function BookingRequestDialog({
                   <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <DialogTitle>Booking Request Submitted</DialogTitle>
+                  <DialogTitle>{t('booking.bookingSubmitted')}</DialogTitle>
                   <DialogDescription>
-                    Booking ID: {bookingId.toString()}
+                    {t('booking.bookingId')}: {bookingId.toString()}
                   </DialogDescription>
                 </div>
               </div>
@@ -226,25 +230,25 @@ export default function BookingRequestDialog({
             <BookingPaymentInstructions bookingId={bookingId} hotelName={hotelName} />
             <DialogFooter>
               <Button onClick={handleClose} className="w-full">
-                Close
+                {t('common.close')}
               </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Request Booking at {hotelName}</DialogTitle>
+              <DialogTitle>{t('booking.requestBooking')} {hotelName}</DialogTitle>
               <DialogDescription>
-                Fill in your booking details. You'll receive payment instructions after submission.
+                {t('booking.fillDetails')}
               </DialogDescription>
             </DialogHeader>
 
             {!isAuthenticated && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Authentication Required</AlertTitle>
+                <AlertTitle>{t('booking.authRequired')}</AlertTitle>
                 <AlertDescription>
-                  You must be logged in to create a booking request. Please log in and try again.
+                  {t('booking.mustLogin')}
                 </AlertDescription>
               </Alert>
             )}
@@ -252,7 +256,7 @@ export default function BookingRequestDialog({
             {!actorReady && actorError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Connection Error</AlertTitle>
+                <AlertTitle>{t('booking.connectionError')}</AlertTitle>
                 <AlertDescription className="space-y-2">
                   <p>{getErrorMessage(actorError)}</p>
                   <Button
@@ -262,7 +266,7 @@ export default function BookingRequestDialog({
                     className="gap-2"
                   >
                     <RefreshCw className="h-4 w-4" />
-                    Retry Connection
+                    {t('booking.retryConnection')}
                   </Button>
                 </AlertDescription>
               </Alert>
@@ -271,15 +275,44 @@ export default function BookingRequestDialog({
             {bookingError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Booking Failed</AlertTitle>
+                <AlertTitle>{t('booking.bookingFailed')}</AlertTitle>
                 <AlertDescription>{bookingError}</AlertDescription>
               </Alert>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="roomType" className="flex items-center gap-2">
+                  <BedDouble className="h-4 w-4" />
+                  {t('booking.roomType')} *
+                </Label>
+                <Select
+                  value={selectedRoomType}
+                  onValueChange={(value) => {
+                    setSelectedRoomType(value);
+                    setValidationErrors((prev) => ({ ...prev, roomType: undefined }));
+                  }}
+                  disabled={!isAuthenticated || !actorReady || rooms.length === 0}
+                >
+                  <SelectTrigger className={validationErrors.roomType ? 'border-destructive' : ''}>
+                    <SelectValue placeholder={t('booking.selectRoom')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rooms.map((room) => (
+                      <SelectItem key={room.roomType} value={room.roomType}>
+                        {room.roomType}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {validationErrors.roomType && (
+                  <p className="text-sm text-destructive">{validationErrors.roomType}</p>
+                )}
+              </div>
+
               <BookingDatePickerField
                 id="checkIn"
-                label="Check-in Date"
+                label={t('booking.checkInDate')}
                 value={checkInDate}
                 onChange={(date) => {
                   setCheckInDate(date);
@@ -293,7 +326,7 @@ export default function BookingRequestDialog({
 
               <BookingDatePickerField
                 id="checkOut"
-                label="Check-out Date"
+                label={t('booking.checkOutDate')}
                 value={checkOutDate}
                 onChange={(date) => {
                   setCheckOutDate(date);
@@ -308,7 +341,7 @@ export default function BookingRequestDialog({
               <div className="space-y-2">
                 <Label htmlFor="guests" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Number of Guests
+                  {t('booking.numberOfGuests')}
                 </Label>
                 <Input
                   id="guests"
@@ -336,7 +369,7 @@ export default function BookingRequestDialog({
                   onClick={handleClose}
                   disabled={createBooking.isPending}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -345,10 +378,10 @@ export default function BookingRequestDialog({
                   {createBooking.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
+                      {t('booking.submitting')}
                     </>
                   ) : (
-                    'Submit Request'
+                    t('booking.submitRequest')
                   )}
                 </Button>
               </DialogFooter>

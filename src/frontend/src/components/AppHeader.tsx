@@ -1,243 +1,158 @@
 import { useState } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Hotel, Users, Menu, Shield, User, AlertCircle, RefreshCw, UserCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import LoginButton from './auth/LoginButton';
+import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useIsAdmin } from '../hooks/useCurrentUser';
+import { useI18n } from '../i18n/I18nProvider';
+import LoginButton from './auth/LoginButton';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Menu, User, Shield, AlertCircle, RefreshCw, Languages } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AppHeader() {
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { identity } = useInternetIdentity();
-  const { showAdminUI, isFailed, isLoading, refetch } = useIsAdmin();
-  
-  const isAuthenticated = !!identity;
-  
-  // Show verification error state when authenticated but admin check failed
-  const showVerificationError = isAuthenticated && isFailed;
+  const { data: isAdmin, isLoading: adminLoading, isFailed: adminFailed, refetch: refetchAdmin } = useIsAdmin();
+  const { language, setLanguage, t } = useI18n();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavigation = (path: '/' | '/hotel' | '/browse' | '/account' | '/admin' | '/guest-account') => {
+  const isAuthenticated = !!identity;
+
+  const handleNavigation = (path: string) => {
     navigate({ to: path });
     setMobileMenuOpen(false);
   };
-  
-  const handleRetryAdminCheck = async () => {
-    await refetch();
+
+  const handleLanguageChange = (newLang: string) => {
+    if (newLang === 'en' || newLang === 'id') {
+      setLanguage(newLang);
+    }
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-4 md:gap-8">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-base md:text-lg">
-            <img 
-              src="/assets/generated/sgo-logo.dim_512x512.png" 
-              alt="Sentra Guest OS Logo" 
-              className="h-8 w-8 flex-shrink-0"
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-6">
+          <button
+            onClick={() => handleNavigation('/')}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <img
+              src="/assets/generated/sgo-logo.dim_512x512.png"
+              alt="SGO Logo"
+              className="h-8 w-8 rounded"
             />
-            <span className="hidden sm:inline-block">Sentra Guest OS (SGO)</span>
-            <span className="sm:hidden">SGO</span>
-          </Link>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate({ to: '/' })}
-              className="gap-2"
-            >
-              <Users className="h-4 w-4" />
-              <span className="hidden lg:inline">Guest Area</span>
-              <span className="lg:hidden">Guest</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate({ to: '/hotel' })}
-              className="gap-2"
-            >
-              <Hotel className="h-4 w-4" />
-              <span className="hidden lg:inline">Hotel Area</span>
-              <span className="lg:hidden">Hotel</span>
+            <span className="font-bold text-lg hidden sm:inline">SGO</span>
+          </button>
+
+          <nav className="hidden md:flex items-center gap-4">
+            <Button variant="ghost" onClick={() => handleNavigation('/browse')}>
+              {t('guestArea.browseHotels')}
             </Button>
             {isAuthenticated && (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate({ to: '/guest-account' })}
-                  className="gap-2"
-                >
-                  <UserCircle className="h-4 w-4" />
-                  <span className="hidden lg:inline">Guest Account</span>
-                  <span className="lg:hidden">Account</span>
+                <Button variant="ghost" onClick={() => handleNavigation('/guest-account')}>
+                  {t('header.guestAccount')}
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate({ to: '/account' })}
-                  className="gap-2"
-                >
-                  <User className="h-4 w-4" />
-                  <span className="hidden lg:inline">Account Status</span>
-                  <span className="lg:hidden">Status</span>
+                <Button variant="ghost" onClick={() => handleNavigation('/account-status')}>
+                  {t('header.accountStatus')}
                 </Button>
               </>
             )}
-            {showAdminUI && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate({ to: '/admin' })}
-                className="gap-2 border-primary/50 bg-primary/5"
-                disabled={isLoading}
-              >
-                <Shield className="h-4 w-4" />
-                <span className="hidden lg:inline">Admin Panel</span>
-                <span className="lg:hidden">Admin</span>
-              </Button>
-            )}
-            {showVerificationError && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRetryAdminCheck}
-                className="gap-2 text-destructive hover:text-destructive"
-                title="Admin status could not be verified. Click to retry."
-              >
-                <AlertCircle className="h-4 w-4" />
-                <RefreshCw className="h-3 w-3" />
-              </Button>
+            {isAdmin && !adminLoading && (
+              <>
+                <Badge variant="default" className="ml-2">
+                  Admin
+                </Badge>
+                <Button variant="ghost" onClick={() => handleNavigation('/admin')}>
+                  {t('header.adminPanel')}
+                </Button>
+              </>
             )}
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Admin Badge - Desktop */}
-          {showAdminUI && (
-            <Badge variant="default" className="hidden md:flex gap-1">
-              <Shield className="h-3 w-3" />
-              Admin
-            </Badge>
-          )}
-          
-          <LoginButton />
-          
-          {/* Mobile Menu */}
+        <div className="flex items-center gap-3">
+          <Select value={language} onValueChange={handleLanguageChange}>
+            <SelectTrigger className="w-[100px] h-9">
+              <Languages className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="id">Indonesia</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="hidden md:block">
+            <LoginButton />
+          </div>
+
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[320px]">
-              <SheetTitle className="text-left mb-6">Menu</SheetTitle>
-              <nav className="flex flex-col gap-4">
-                {/* Admin Badge - Mobile */}
-                {showAdminUI && (
-                  <Badge variant="default" className="w-fit gap-1">
-                    <Shield className="h-3 w-3" />
-                    Admin Access
-                  </Badge>
-                )}
-                
-                {/* Verification Error - Mobile */}
-                {showVerificationError && (
-                  <Alert variant="destructive" className="py-2">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-xs">
-                      Admin status could not be verified.
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRetryAdminCheck}
-                        className="mt-2 h-8 w-full gap-2"
-                      >
-                        <RefreshCw className="h-3 w-3" />
-                        Retry Verification
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => handleNavigation('/')}
-                  className="justify-start gap-3"
-                >
-                  <Users className="h-5 w-5" />
-                  Guest Area
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-4 mt-6">
+                <Button variant="ghost" className="justify-start" onClick={() => handleNavigation('/browse')}>
+                  {t('guestArea.browseHotels')}
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => handleNavigation('/browse')}
-                  className="justify-start gap-3"
-                >
-                  <Hotel className="h-5 w-5" />
-                  Browse Hotels
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => handleNavigation('/hotel')}
-                  className="justify-start gap-3"
-                >
-                  <Hotel className="h-5 w-5" />
-                  Hotel Area
-                </Button>
-                
-                {/* Guest Account Link - Mobile (authenticated only) */}
                 {isAuthenticated && (
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={() => handleNavigation('/guest-account')}
-                    className="justify-start gap-3"
-                  >
-                    <UserCircle className="h-5 w-5" />
-                    Guest Account
+                  <>
+                    <Button variant="ghost" className="justify-start gap-2" onClick={() => handleNavigation('/guest-account')}>
+                      <User className="h-4 w-4" />
+                      {t('header.guestAccount')}
+                    </Button>
+                    <Button variant="ghost" className="justify-start" onClick={() => handleNavigation('/account-status')}>
+                      {t('header.accountStatus')}
+                    </Button>
+                  </>
+                )}
+                {isAdmin && !adminLoading && (
+                  <Button variant="ghost" className="justify-start gap-2" onClick={() => handleNavigation('/admin')}>
+                    <Shield className="h-4 w-4" />
+                    {t('header.adminPanel')}
                   </Button>
                 )}
-                
-                {/* Account Status Link - Mobile (authenticated only) */}
-                {isAuthenticated && (
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={() => handleNavigation('/account')}
-                    className="justify-start gap-3"
-                  >
-                    <User className="h-5 w-5" />
-                    Account Status
-                  </Button>
-                )}
-                
-                {/* Admin Panel Link - Mobile (admin only) */}
-                {showAdminUI && (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => handleNavigation('/admin')}
-                    className="justify-start gap-3 border-primary/50 bg-primary/5"
-                    disabled={isLoading}
-                  >
-                    <Shield className="h-5 w-5" />
-                    Admin Panel
-                  </Button>
-                )}
+                <div className="pt-4 border-t">
+                  <LoginButton />
+                </div>
               </nav>
             </SheetContent>
           </Sheet>
         </div>
       </div>
+
+      {adminFailed && isAuthenticated && (
+        <div className="border-t bg-yellow-500/10">
+          <div className="container px-4 py-2">
+            <Alert variant="default" className="border-yellow-500/50 bg-transparent">
+              <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <AlertDescription className="text-xs flex items-center justify-between gap-2">
+                <span className="text-yellow-600 dark:text-yellow-400">
+                  Admin verification temporarily unavailable. Retrying...
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => refetchAdmin()}
+                  className="h-6 gap-1 text-yellow-600 dark:text-yellow-400"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

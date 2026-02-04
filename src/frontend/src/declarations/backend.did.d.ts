@@ -32,6 +32,7 @@ export interface BookingRequest {
   'hotel' : Principal,
   'createdAt' : Time,
   'lastUpdated' : Time,
+  'room_type' : string,
   'checkInDate' : Time,
   'guest' : Principal,
   'checkOutDate' : Time,
@@ -43,6 +44,7 @@ export type BookingStatus = { 'cancelled' : null } |
   { 'confirmed' : null };
 export interface CreateBookingInput {
   'hotel' : Principal,
+  'room_type' : string,
   'checkInDate' : Time,
   'guest' : Principal,
   'checkOutDate' : Time,
@@ -66,6 +68,7 @@ export interface HotelProfile {
   'country' : string,
   'logo' : [] | [string],
   'name' : string,
+  'payment_instructions' : [] | [string],
   'location' : MapLocation,
   'rooms' : Array<RoomInventory>,
   'classification' : HotelClassification,
@@ -106,8 +109,13 @@ export interface RSVP {
   'timestamp' : Time,
   'attending' : boolean,
 }
+export type RoomCurrency = { 'EUR' : null } |
+  { 'IDR' : null } |
+  { 'SGD' : null } |
+  { 'USD' : null };
 export interface RoomInventory {
   'pricePerNight' : bigint,
+  'currency' : RoomCurrency,
   'promo' : [] | [string],
   'roomType' : string,
   'photos' : Array<string>,
@@ -140,7 +148,6 @@ export interface _SERVICE {
   'confirmPaymentRequest' : ActorMethod<[string], undefined>,
   'consumeInviteToken' : ActorMethod<[string], boolean>,
   'createBookingRequest' : ActorMethod<[CreateBookingInput], bigint>,
-  'createBookingRequestWithTesting' : ActorMethod<[CreateBookingInput], bigint>,
   'createPaymentRequest' : ActorMethod<
     [bigint, string, string, PaymentOption],
     string

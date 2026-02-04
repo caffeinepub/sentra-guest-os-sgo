@@ -17,8 +17,15 @@ export const MapLocation = IDL.Record({
   'mapLink' : IDL.Text,
   'address' : IDL.Text,
 });
+export const RoomCurrency = IDL.Variant({
+  'EUR' : IDL.Null,
+  'IDR' : IDL.Null,
+  'SGD' : IDL.Null,
+  'USD' : IDL.Null,
+});
 export const RoomInventory = IDL.Record({
   'pricePerNight' : IDL.Nat,
+  'currency' : RoomCurrency,
   'promo' : IDL.Opt(IDL.Text),
   'roomType' : IDL.Text,
   'photos' : IDL.Vec(IDL.Text),
@@ -35,6 +42,7 @@ export const HotelProfile = IDL.Record({
   'country' : IDL.Text,
   'logo' : IDL.Opt(IDL.Text),
   'name' : IDL.Text,
+  'payment_instructions' : IDL.Opt(IDL.Text),
   'location' : MapLocation,
   'rooms' : IDL.Vec(RoomInventory),
   'classification' : HotelClassification,
@@ -57,6 +65,7 @@ export const UserRole = IDL.Variant({
 export const Time = IDL.Int;
 export const CreateBookingInput = IDL.Record({
   'hotel' : IDL.Principal,
+  'room_type' : IDL.Text,
   'checkInDate' : Time,
   'guest' : IDL.Principal,
   'checkOutDate' : Time,
@@ -92,6 +101,7 @@ export const BookingRequest = IDL.Record({
   'hotel' : IDL.Principal,
   'createdAt' : Time,
   'lastUpdated' : Time,
+  'room_type' : IDL.Text,
   'checkInDate' : Time,
   'guest' : IDL.Principal,
   'checkOutDate' : Time,
@@ -163,11 +173,6 @@ export const idlService = IDL.Service({
   'confirmPaymentRequest' : IDL.Func([IDL.Text], [], []),
   'consumeInviteToken' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'createBookingRequest' : IDL.Func([CreateBookingInput], [IDL.Nat], []),
-  'createBookingRequestWithTesting' : IDL.Func(
-      [CreateBookingInput],
-      [IDL.Nat],
-      [],
-    ),
   'createPaymentRequest' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, PaymentOption],
       [IDL.Text],
@@ -257,8 +262,15 @@ export const idlFactory = ({ IDL }) => {
     'mapLink' : IDL.Text,
     'address' : IDL.Text,
   });
+  const RoomCurrency = IDL.Variant({
+    'EUR' : IDL.Null,
+    'IDR' : IDL.Null,
+    'SGD' : IDL.Null,
+    'USD' : IDL.Null,
+  });
   const RoomInventory = IDL.Record({
     'pricePerNight' : IDL.Nat,
+    'currency' : RoomCurrency,
     'promo' : IDL.Opt(IDL.Text),
     'roomType' : IDL.Text,
     'photos' : IDL.Vec(IDL.Text),
@@ -275,6 +287,7 @@ export const idlFactory = ({ IDL }) => {
     'country' : IDL.Text,
     'logo' : IDL.Opt(IDL.Text),
     'name' : IDL.Text,
+    'payment_instructions' : IDL.Opt(IDL.Text),
     'location' : MapLocation,
     'rooms' : IDL.Vec(RoomInventory),
     'classification' : HotelClassification,
@@ -297,6 +310,7 @@ export const idlFactory = ({ IDL }) => {
   const Time = IDL.Int;
   const CreateBookingInput = IDL.Record({
     'hotel' : IDL.Principal,
+    'room_type' : IDL.Text,
     'checkInDate' : Time,
     'guest' : IDL.Principal,
     'checkOutDate' : Time,
@@ -332,6 +346,7 @@ export const idlFactory = ({ IDL }) => {
     'hotel' : IDL.Principal,
     'createdAt' : Time,
     'lastUpdated' : Time,
+    'room_type' : IDL.Text,
     'checkInDate' : Time,
     'guest' : IDL.Principal,
     'checkOutDate' : Time,
@@ -400,11 +415,6 @@ export const idlFactory = ({ IDL }) => {
     'confirmPaymentRequest' : IDL.Func([IDL.Text], [], []),
     'consumeInviteToken' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'createBookingRequest' : IDL.Func([CreateBookingInput], [IDL.Nat], []),
-    'createBookingRequestWithTesting' : IDL.Func(
-        [CreateBookingInput],
-        [IDL.Nat],
-        [],
-      ),
     'createPaymentRequest' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, PaymentOption],
         [IDL.Text],

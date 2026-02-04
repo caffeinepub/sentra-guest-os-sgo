@@ -5,7 +5,7 @@ import type { BookingRequest, CreateBookingInput } from '../backend';
 import { withTimeout } from '../utils/withTimeout';
 import { getErrorMessage } from '../utils/getErrorMessage';
 
-export function useCreateBooking(isTestingMode: boolean = false) {
+export function useCreateBooking() {
   const { actor } = useActorSafe();
   const queryClient = useQueryClient();
   const { identity } = useInternetIdentity();
@@ -14,39 +14,54 @@ export function useCreateBooking(isTestingMode: boolean = false) {
     mutationFn: async (input: CreateBookingInput) => {
       if (!actor) throw new Error('Connection not available. Please retry.');
       try {
-        // Use testing-mode endpoint when testing mode is ON
-        const bookingMethod = isTestingMode 
-          ? actor.createBookingRequestWithTesting 
-          : actor.createBookingRequest;
-        
         return await withTimeout(
-          bookingMethod(input),
+          actor.createBookingRequest(input),
           10000,
           'Booking creation timed out after 10 seconds. Please retry.'
         );
       } catch (error: unknown) {
         // Enhance error message for common booking failures
         const message = getErrorMessage(error);
-        if (message.includes('not available for booking')) {
-          const enhancedError = new Error('This hotel is not currently accepting bookings. It may be inactive or have an unpaid subscription.');
-          throw enhancedError;
-        } else if (message.includes('Invalid hotel')) {
-          const enhancedError = new Error('Unable to create booking: Hotel information could not be verified. Please contact support.');
-          throw enhancedError;
-        } else if (message.includes('Invalid guest')) {
-          const enhancedError = new Error('Unable to create booking: Guest authentication failed. Please log in again.');
-          throw enhancedError;
-        } else if (message.includes('testing mode may be off')) {
-          const enhancedError = new Error('This hotel is only available in testing mode. Please enable testing mode to book.');
-          throw enhancedError;
-        } else if (message.includes('Invalid check-in date')) {
-          const enhancedError = new Error('Check-in date must be at least tomorrow. Please select a future date.');
-          throw enhancedError;
-        } else if (message.includes('Invalid check-out date')) {
-          const enhancedError = new Error('Check-out date must be after check-in date. Please adjust your dates.');
-          throw enhancedError;
+        
+        // Testing mode errors
+        if (message.includes('Testing mode required') || message.includes('testing mode')) {
+          throw new Error('This hotel requires testing mode to be enabled. Testing mode is currently disabled on the backend.');
         }
-        // Re-throw as Error instance with normalized message
+        
+        // Hotel availability errors
+        if (message.includes('not available for booking') || message.includes('Unauthorized: This hotel')) {
+          throw new Error('This hotel is not currently accepting bookings. It may be inactive, have an unpaid subscription, or be a test hotel.');
+        }
+        
+        // Hotel not found
+        if (message.includes('Hotel not found')) {
+          throw new Error('Unable to create booking: The selected hotel could not be found. Please try again or contact support.');
+        }
+        
+        // Unpaid hotel
+        if (message.includes('Unpaid Hotel')) {
+          throw new Error('This hotel has not yet paid the onboarding fee. Please contact support if you believe this is an error.');
+        }
+        
+        // Inactive hotel
+        if (message.includes('Inactive Hotel')) {
+          throw new Error('This hotel has not yet been activated. Please contact support if you believe this is an error.');
+        }
+        
+        // Date validation errors
+        if (message.includes('Invalid check-in date')) {
+          throw new Error('Check-in date must be at least tomorrow. Please select a future date.');
+        }
+        if (message.includes('Invalid stay period') || message.includes('Check-out date must be after')) {
+          throw new Error('Check-out date must be after check-in date. Please adjust your dates.');
+        }
+        
+        // Guest count validation
+        if (message.includes('Invalid guests') || message.includes('Cannot create booking with 0 guests')) {
+          throw new Error('At least 1 guest is required for a booking.');
+        }
+        
+        // Re-throw with normalized message
         throw new Error(message);
       }
     },

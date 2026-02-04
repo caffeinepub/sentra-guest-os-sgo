@@ -74,7 +74,7 @@ export default function RouteDiagnosticsErrorCard({
   };
 
   const handleNavigateToTroubleshooting = () => {
-    navigate({ to: '/account', hash: 'troubleshooting' });
+    navigate({ to: '/account-status', hash: 'troubleshooting' });
   };
 
   return (
@@ -249,7 +249,7 @@ export default function RouteDiagnosticsErrorCard({
                 )}
                 
                 <Button asChild variant="outline" className="w-full">
-                  <Link to="/account">
+                  <Link to="/account-status">
                     Open Account Status
                   </Link>
                 </Button>

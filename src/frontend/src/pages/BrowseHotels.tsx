@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useGetAllHotelsWithPrincipals } from '../hooks/useBrowseHotels';
 import { useTestingMode } from '../hooks/useTestingMode';
+import { useBackendTestingMode } from '../hooks/useBackendTestingMode';
+import { useI18n } from '../i18n/I18nProvider';
 import BookingRequestDialog from '../components/bookings/BookingRequestDialog';
 import GuestHotelRoomsDialog from '../components/hotel/GuestHotelRoomsDialog';
 import RouteDiagnosticsErrorCard from '../components/diagnostics/RouteDiagnosticsErrorCard';
@@ -11,10 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Loader2, Search, MapPin, ExternalLink, Building2, CalendarCheck, Info, FlaskConical, BedDouble } from 'lucide-react';
+import { Loader2, Search, MapPin, ExternalLink, Building2, CalendarCheck, Info, FlaskConical, BedDouble, AlertTriangle } from 'lucide-react';
 import { HotelClassification } from '../backend';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { Principal } from '@icp-sdk/core/principal';
 
 const classificationLabels: Record<HotelClassification, string> = {
   [HotelClassification.fiveStar]: '5-Star',
@@ -26,18 +27,21 @@ const classificationLabels: Record<HotelClassification, string> = {
 };
 
 export default function BrowseHotels() {
-  const { isTestingMode, toggleTestingMode } = useTestingMode();
-  const { data: hotels, isLoading, isError, error, refetch } = useGetAllHotelsWithPrincipals(isTestingMode);
+  const { t } = useI18n();
+  const { isTestingMode: localTestingMode, toggleTestingMode } = useTestingMode();
+  const { data: backendTestingMode, isLoading: backendTestingModeLoading } = useBackendTestingMode();
+  
+  const effectiveTestingMode = localTestingMode && (backendTestingMode === true);
+  
+  const { data: hotels, isLoading, isError, error, refetch } = useGetAllHotelsWithPrincipals(effectiveTestingMode);
   const [countryFilter, setCountryFilter] = useState('');
 
-  // Get unique countries from hotels
   const availableCountries = useMemo(() => {
     if (!hotels) return [];
     const countries = new Set(hotels.map(h => h.profile.country).filter(c => c && c !== 'unknown'));
     return Array.from(countries).sort();
   }, [hotels]);
 
-  // Filter hotels by country
   const filteredHotels = useMemo(() => {
     if (!hotels) return [];
     if (!countryFilter) return hotels;
@@ -46,7 +50,8 @@ export default function BrowseHotels() {
     );
   }, [hotels, countryFilter]);
 
-  // Loading state
+  const showTestingModeWarning = localTestingMode && backendTestingMode === false && !backendTestingModeLoading;
+
   if (isLoading) {
     return (
       <div className="container py-12">
@@ -57,7 +62,6 @@ export default function BrowseHotels() {
     );
   }
 
-  // Error state - show diagnostics with retry
   if (isError) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to load hotels';
     return (
@@ -73,48 +77,55 @@ export default function BrowseHotels() {
   return (
     <div className="container py-8 md:py-12">
       <div className="mx-auto max-w-6xl space-y-6 md:space-y-8 px-4">
-        {/* Header */}
         <div className="space-y-3 md:space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Browse Hotels</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{t('browse.title')}</h1>
           <p className="text-base sm:text-lg text-muted-foreground">
-            Discover hotels worldwide on the Sentra Guest OS platform
+            {t('browse.subtitle')}
           </p>
         </div>
 
-        {/* Filter Section */}
+        {showTestingModeWarning && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>{t('browse.testingModeUnavailable')}</AlertTitle>
+            <AlertDescription>
+              {t('browse.testingModeDisabled')}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Search className="h-5 w-5 flex-shrink-0" />
-              Filter Hotels
+              {t('browse.filterHotels')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Testing Mode Toggle */}
             <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
               <div className="flex items-center gap-3">
                 <FlaskConical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <div className="space-y-0.5">
                   <Label htmlFor="testing-mode" className="text-sm font-medium cursor-pointer">
-                    Testing Mode
+                    {t('browse.testingMode')}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Show test hotels for exploring the booking experience
+                    {t('browse.testingModeDesc')}
                   </p>
                 </div>
               </div>
               <Switch
                 id="testing-mode"
-                checked={isTestingMode}
+                checked={localTestingMode}
                 onCheckedChange={toggleTestingMode}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="countryFilter">Search by Country</Label>
+              <Label htmlFor="countryFilter">{t('browse.searchByCountry')}</Label>
               <Input
                 id="countryFilter"
-                placeholder="Enter country name..."
+                placeholder={t('browse.enterCountry')}
                 value={countryFilter}
                 onChange={(e) => setCountryFilter(e.target.value)}
                 className="w-full"
@@ -122,7 +133,7 @@ export default function BrowseHotels() {
             </div>
             {availableCountries.length > 0 && (
               <div className="space-y-2">
-                <Label>Quick Select:</Label>
+                <Label>{t('browse.quickSelect')}</Label>
                 <ScrollArea className="w-full whitespace-nowrap">
                   <div className="flex gap-2 pb-2">
                     <Button
@@ -131,7 +142,7 @@ export default function BrowseHotels() {
                       onClick={() => setCountryFilter('')}
                       className="flex-shrink-0"
                     >
-                      All Countries
+                      {t('browse.allCountries')}
                     </Button>
                     {availableCountries.map((country) => (
                       <Button
@@ -152,11 +163,10 @@ export default function BrowseHotels() {
           </CardContent>
         </Card>
 
-        {/* Results */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-semibold">
-              {filteredHotels.length} Hotels Found
+              {filteredHotels.length} {t('browse.hotelsFound')}
             </h2>
           </div>
 
@@ -167,40 +177,17 @@ export default function BrowseHotels() {
                   <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
                   <p className="text-base sm:text-lg font-medium text-muted-foreground mb-2">
                     {countryFilter 
-                      ? `No hotels found in "${countryFilter}"`
-                      : 'No hotels available yet'}
+                      ? `${t('browse.noHotelsInCountry')} "${countryFilter}"`
+                      : t('browse.noHotelsYet')}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {countryFilter 
-                      ? 'Try searching for a different country or clear the filter.'
-                      : isTestingMode 
-                        ? 'No test hotels are available. Try turning off testing mode to see production hotels.'
-                        : 'Hotels will appear here once they are activated for public visibility.'}
+                      ? t('browse.tryDifferent')
+                      : effectiveTestingMode 
+                        ? t('browse.noTestHotels')
+                        : t('browse.hotelsWillAppear')}
                   </p>
                 </div>
-                
-                {!countryFilter && !isTestingMode && (
-                  <Alert className="border-blue-500/50 bg-blue-500/5">
-                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <AlertTitle className="text-blue-600 dark:text-blue-400">
-                      Why are no hotels visible?
-                    </AlertTitle>
-                    <AlertDescription className="text-xs text-blue-600/80 dark:text-blue-400/80 space-y-2">
-                      <p>
-                        Hotels must meet the following requirements to be publicly visible:
-                      </p>
-                      <ul className="list-disc list-inside space-y-1 pl-2">
-                        <li>Activated by an administrator</li>
-                        <li>Not marked as test/dummy hotel</li>
-                        <li>Subscription payment confirmed</li>
-                      </ul>
-                      <p className="pt-2">
-                        If you are a hotel owner, please ensure your profile is complete and your subscription is active. 
-                        Contact support at sentraguestos.info@gmail.com if you need assistance.
-                      </p>
-                    </AlertDescription>
-                  </Alert>
-                )}
               </CardContent>
             </Card>
           ) : (
@@ -254,7 +241,7 @@ export default function BrowseHotels() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-sm text-primary hover:underline flex-1"
                           >
-                            View on map
+                            {t('browse.viewOnMap')}
                             <ExternalLink className="h-3 w-3 flex-shrink-0" />
                           </a>
                           <GuestHotelRoomsDialog
@@ -263,7 +250,7 @@ export default function BrowseHotels() {
                             trigger={
                               <Button variant="outline" size="sm" className="gap-2">
                                 <BedDouble className="h-4 w-4" />
-                                Rooms
+                                {t('browse.rooms')}
                               </Button>
                             }
                           />
@@ -271,11 +258,11 @@ export default function BrowseHotels() {
                         <BookingRequestDialog
                           hotelName={hotel.name}
                           hotelPrincipal={hotelPrincipal}
-                          isTestingMode={isTestingMode}
+                          rooms={hotel.rooms}
                           trigger={
                             <Button variant="default" size="sm" className="gap-2 w-full">
                               <CalendarCheck className="h-4 w-4" />
-                              Book Now
+                              {t('browse.bookNow')}
                             </Button>
                           }
                         />

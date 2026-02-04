@@ -21,6 +21,7 @@ export interface HotelProfileWithPrincipal {
 }
 export interface CreateBookingInput {
     hotel: Principal;
+    room_type: string;
     checkInDate: Time;
     guest: Principal;
     checkOutDate: Time;
@@ -33,6 +34,7 @@ export interface BookingRequest {
     hotel: Principal;
     createdAt: Time;
     lastUpdated: Time;
+    room_type: string;
     checkInDate: Time;
     guest: Principal;
     checkOutDate: Time;
@@ -83,6 +85,7 @@ export interface InviteToken {
 }
 export interface RoomInventory {
     pricePerNight: bigint;
+    currency: RoomCurrency;
     promo?: string;
     roomType: string;
     photos: Array<string>;
@@ -91,6 +94,7 @@ export interface HotelProfile {
     country: string;
     logo?: string;
     name: string;
+    payment_instructions?: string;
     location: MapLocation;
     rooms: Array<RoomInventory>;
     classification: HotelClassification;
@@ -140,6 +144,12 @@ export enum PaymentStatus {
     rejected = "rejected",
     confirmed = "confirmed"
 }
+export enum RoomCurrency {
+    EUR = "EUR",
+    IDR = "IDR",
+    SGD = "SGD",
+    USD = "USD"
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -155,7 +165,6 @@ export interface backendInterface {
     confirmPaymentRequest(id: string): Promise<void>;
     consumeInviteToken(token: string): Promise<boolean>;
     createBookingRequest(input: CreateBookingInput): Promise<bigint>;
-    createBookingRequestWithTesting(input: CreateBookingInput): Promise<bigint>;
     createPaymentRequest(amount: bigint, id: string, reference: string, option: PaymentOption): Promise<string>;
     createStayRecord(input: CreateStayRecordInput): Promise<bigint>;
     deleteRoomInventory(hotelPrincipal: Principal, roomType: string): Promise<void>;
