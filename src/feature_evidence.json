@@ -1,0 +1,86 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-frontend-actor-readiness-gating-to-verify-backend-liveness-by-calling-the-new-backend-health-endpoint-after-actor-creation-inside-useactorsafe-and-treat-any-failure-timeout-rejection-replica-error-as-a-terminal-user-visible-connection-error-via-existing-diagnostics-ui-no-infinite-loading",
+      "featureTitle": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+      "files": [
+        "frontend/src/hooks/useActorSafe.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-25"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-no-app-route-depends-on-the-legacy-blocking-actor-hook-frontend-src-hooks-useactor-ts-for-initial-page-render-migrate-any-remaining-usage-in-pages-components-to-useactorsafe-requireactorready-so-a-stopped-backend-cannot-cause-cascading-failures-or-blank-panels",
+      "featureTitle": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
+      "files": [
+        "frontend/src/hooks/useBrowseHotels.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-26"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-improve-the-stopped-canister-diagnostics-message-english-ui-copy-to-include-1-the-detected-canister-id-if-present-in-the-error-text-2-a-clear-statement-that-the-backend-is-stopped-and-3-actionable-next-steps-for-the-operator-admin-retry-hard-refresh-open-troubleshooting-without-exposing-internal-stack-traces-by-default",
+      "featureTitle": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
+      "files": [
+        "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
+        "frontend/src/utils/replicaRejection.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-27"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-lightweight-regression-test-plan-entry-update-frontend-regression-checklist-md-specifically-for-the-stopped-backend-scenario-to-verify-route-access-retry-behavior-troubleshooting-navigation-and-that-access-control-initialization-warnings-do-not-block-non-admin-user-flows-when-backend-is-healthy",
+      "featureTitle": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+      "files": [
+        "frontend/REGRESSION_CHECKLIST.md"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-28"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

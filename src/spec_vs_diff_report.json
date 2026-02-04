@@ -1,0 +1,52 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-04T10:46:00.076Z",
+  "summary": "Diff implements frontend health-verified actor initialization (with bounded timeouts and non-blocking access-control init), adds stopped-canister (IC0508) diagnostics parsing + improved UI copy/actions, and updates regression checklist for the stopped-backend scenario. Backend diff evidence shows only a new HealthStatus type; the actual public query `health()` endpoint is not visible in the provided backend truncation, so REQ-24 cannot be confirmed from this diff summary alone. There are also unrelated frontend content/UX changes (e.g., payment instruction recipient updates) that were not requested.",
+  "missing_requirements": [
+    {
+      "id": "REQ-24",
+      "requirement": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning at minimum `{ ok: Bool; timestamp: Time.now() }`, callable by anonymous users without trapping, with a stable response shape.",
+      "reason": "The diff summary for `backend/main.mo` only shows the new `HealthStatus` type definition; it does not show an exported `public query func health()` (or equivalent) implementation. Since the file is truncated, this may exist but is not evidenced in the provided snippet.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "requirement": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate remaining usage to `useActorSafe` + `RequireActorReady`.",
+      "reason": "The diff shows some hooks/pages moving to `useActorSafe` (e.g., `useBrowseHotels.ts`) and mentions route wrapping in a file summary, but it does not provide evidence of removing/migrating all route-level usage of the legacy `useActor.ts` hook across the codebase (no grep/audit evidence, and no changes to `frontend/src/hooks/useActor.ts` are shown).",
+      "evidence": [
+        "frontend/src/hooks/useBrowseHotels.ts",
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Updated payment instruction recipient details (e.g., PayPal email and DANA/GoPay numbers) and added/modified WhatsApp admin contact in Hotel Area/payment-related UI.",
+      "reason": "BuildRequest is focused on backend health verification and stopped-canister diagnostics stabilization; changing payment recipient/contact details is unrelated and risks introducing new domain/operational behavior outside the requested scope.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Broader admin/payment UI copy/localization and table UX changes (e.g., admin payment review panel English localization and mobile table behavior) beyond stopped-backend diagnostics.",
+      "reason": "Not requested by REQ-24..REQ-28; these appear to be general UI enhancements unrelated to backend-stopped stabilization.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "confidence": 0.68,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/REGRESSION_CHECKLIST.md",
+    "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
+    "frontend/src/hooks/useActorSafe.ts",
+    "frontend/src/hooks/useBrowseHotels.ts",
+    "frontend/src/utils/replicaRejection.ts",
+    "project_state.json"
+  ]
+}

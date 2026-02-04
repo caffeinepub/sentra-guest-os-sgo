@@ -1,0 +1,930 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 282,
+  "summary": "Aplikasi booking & reservasi hotel \"Sentra Guest OS (SGO)\" (React frontend + Motoko backend) dengan autentikasi Internet Identity/Principal ID, pemisahan area tamu vs hotel, onboarding hotel via invite link sekali pakai, serta mode pembayaran manual via email. Baseline akses inti (Admin Panel, Hotel Area, Guest Account) sempat distabilkan (v22), lalu Step 3 booking/reservasi dasar dikerjakan (draft/live v23) dan dilanjutkan kontrol operasional untuk hotel demo/test + visibilitas (TEST/DUMMY, active/inactive) serta skema hotel subscription bulanan (admin dapat menonaktifkan hotel yang tidak membayar). Setelah rangkaian perbaikan backend untuk section Admin Panel \"Hotel Visibility & Subscription Management\" yang sebelumnya loading lalu blank, pengguna mengonfirmasi panel admin kini sudah muncul kembali (v36).",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Autentikasi Internet Identity (Principal ID) terintegrasi di frontend",
+      "synonyms": [
+        "Internet Identity login",
+        "II auth",
+        "Principal authentication"
+      ],
+      "description": "Frontend menyediakan hook & komponen login Internet Identity serta guard untuk memastikan halaman/area tertentu hanya bisa diakses setelah autentikasi.",
+      "reqIds": [
+        "AR-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Authorization & access control dasar di backend Motoko",
+      "synonyms": [
+        "backend authorization",
+        "access control module"
+      ],
+      "description": "Backend menambahkan modul authorization/access-control (mixin) sebagai fondasi kontrol akses untuk fitur-fitur selanjutnya.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Pemisahan area aplikasi: Guest Area dan Hotel Area (UI/route)",
+      "synonyms": [
+        "role-based areas",
+        "guest/hotel split"
+      ],
+      "description": "Frontend menyediakan halaman/area terpisah untuk tamu dan hotel (GuestArea, HotelArea) sebagai kerangka pemisahan alur berbasis role.",
+      "reqIds": [
+        "AR-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Alur awal pembayaran/subscription: pemilihan metode, instruksi pembayaran, dan panel review admin",
+      "synonyms": [
+        "payment method selector",
+        "payment instructions",
+        "admin payment review"
+      ],
+      "description": "Frontend menyediakan komponen dan hooks untuk request pembayaran/subscription, memilih metode pembayaran, menampilkan instruksi, serta panel admin untuk meninjau pembayaran (belum memastikan integrasi gateway end-to-end).",
+      "reqIds": [
+        "AR-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Kerangka aplikasi awal (layout, header/footer, profil) + integrasi actor backend di frontend",
+      "synonyms": [
+        "initial app scaffold",
+        "actor hook"
+      ],
+      "description": "Frontend menambahkan layout aplikasi, komponen header/footer, dialog setup profil, serta utilitas/hook untuk membuat actor dan berkomunikasi dengan canister backend.",
+      "reqIds": [
+        "AR-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Halaman Browse Hotels (daftar/browse hotel) untuk tamu",
+      "synonyms": [
+        "browse hotels page",
+        "hotel listing"
+      ],
+      "description": "Frontend menambahkan halaman BrowseHotels beserta hook (useBrowseHotels) untuk menampilkan daftar/browse hotel sebagai bagian awal alur pencarian hotel (belum mencakup booking end-to-end).",
+      "reqIds": [
+        "AR-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Form & hook profil hotel (Hotel Profile) di Hotel Area",
+      "synonyms": [
+        "hotel profile form",
+        "useHotelProfile"
+      ],
+      "description": "Frontend menambahkan komponen HotelProfileForm dan hook useHotelProfile untuk melihat/mengubah data profil hotel sebagai fondasi manajemen data hotel.",
+      "reqIds": [
+        "AR-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Panel Principal ID (copy/share) untuk identitas akun tanpa email",
+      "synonyms": [
+        "PrincipalIdPanel",
+        "copyable Principal ID",
+        "account identity panel"
+      ],
+      "description": "Frontend menambahkan komponen Panel Principal ID yang menampilkan Internet Identity Principal pengguna dalam format yang jelas serta mudah di-copy/share sebagai identitas akun tanpa email.",
+      "reqIds": [
+        "AR-21",
+        "AR-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Sistem Hotel Invite Token sekali pakai (single-use) end-to-end (backend + UI gate + admin panel)",
+      "synonyms": [
+        "hotel invite link/token",
+        "single-use invite",
+        "invite gate",
+        "AdminHotelInvitePanel"
+      ],
+      "description": "Backend Motoko menambahkan dukungan token undangan hotel yang dapat dibuat oleh admin/owner dan dikonsumsi tepat sekali. Frontend menambahkan Invite Gate pada Hotel Area untuk pengguna non-invited, serta Admin panel untuk generate/list/copy token dan melihat status (unused/used) dan metadata waktu.",
+      "reqIds": [
+        "AR-11",
+        "AR-29",
+        "AR-30",
+        "AR-34",
+        "AR-35",
+        "AR-36",
+        "AR-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Mode pembayaran subscription manual via email (UI instruksi pembayaran)",
+      "synonyms": [
+        "email-only manual payment",
+        "manual activation by email",
+        "PaymentInstructions"
+      ],
+      "description": "Alur pembayaran/subscription pada UI diarahkan ke mode manual: instruksi pembayaran mengarahkan hotel untuk menghubungi email resmi sentraguestos.info@gmail.com untuk metode pembayaran dan aktivasi, tanpa mengklaim dukungan PayPal/GoPay/DANA end-to-end saat ini.",
+      "reqIds": [
+        "AR-23",
+        "AR-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "Dukungan PWA dasar (manifest + service worker + registrasi)",
+      "synonyms": [
+        "PWA installable",
+        "service worker",
+        "manifest.webmanifest"
+      ],
+      "description": "Frontend menambahkan manifest PWA, service worker, dan registrasi SW untuk mendukung instalasi dan penggunaan lintas perangkat (mobile/desktop) via browser.",
+      "reqIds": [
+        "AR-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Mekanisme recovery/penetapan ulang akses Owner/Admin (reset admin access)",
+      "synonyms": [
+        "admin recovery",
+        "reset owner",
+        "ResetAdminAccessCard",
+        "useAdminReset"
+      ],
+      "description": "Frontend menambahkan komponen ResetAdminAccessCard dan hook useAdminReset untuk membantu memulihkan/menetapkan ulang akses Owner/Admin ketika user login dengan Principal ID berbeda dari first-login. Backend Motoko diperbarui pada modul authorization/access-control dan main canister untuk mendukung alur reset/recovery ini.",
+      "reqIds": [
+        "AR-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Panel status akun & troubleshooting untuk clarifikasi Principal ID dan role (Owner/Admin)",
+      "synonyms": [
+        "AccountStatusPanel",
+        "TroubleshootingSection",
+        "role indicator",
+        "account diagnostics"
+      ],
+      "description": "Menambahkan komponen UI untuk menampilkan status akun saat ini (termasuk Principal ID) dan bagian troubleshooting/panduan untuk membantu pengguna memahami deteksi role Owner/Admin, serta langkah-langkah diagnosis umum ketika panel admin tidak muncul atau terjadi kebingungan login Internet Identity.",
+      "reqIds": [
+        "AR-20",
+        "AR-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "UI gating ketat untuk kontrol Admin-only (Reset Admin Access disembunyikan untuk non-admin)",
+      "synonyms": [
+        "AdminRecoveryReveal",
+        "admin-only reset admin access UI",
+        "account status admin gating"
+      ],
+      "description": "Menambahkan/me-refactor UI di area Account Status agar kontrol sensitif khusus Admin (terutama reset/pemulihan akses Owner/Admin) tidak terlihat/terakses oleh user biasa. Non-admin hanya melihat status akun read-only (Principal ID + role).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-15",
+      "title": "Guest Account Area + Stay History (riwayat menginap) berbasis Principal ID",
+      "synonyms": [
+        "GuestAccountPage",
+        "StayHistorySection",
+        "guest profile summary",
+        "booking/stay history"
+      ],
+      "description": "Frontend menambahkan halaman Guest Account yang menampilkan ringkasan profil akun tamu berbasis Principal ID serta bagian Stay History yang menampilkan daftar riwayat menginap/booking secara kronologis melalui hook useStayHistory.",
+      "reqIds": [
+        "AR-20",
+        "AR-22",
+        "AR-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Pencatatan stay history oleh Hotel/Admin (workflow + backend model minimal)",
+      "synonyms": [
+        "RecordStayCard",
+        "admin/hotel record stay",
+        "stay history management"
+      ],
+      "description": "Menambahkan fondasi workflow dan model backend untuk membuat/mengelola catatan riwayat menginap yang terikat pada Guest Principal ID dan Hotel Principal ID; di frontend tersedia komponen RecordStayCard untuk input/pencatatan stay agar stay history berbasis entri valid, bukan klaim manual tamu.",
+      "reqIds": [
+        "AR-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Domain booking/reservasi dasar end-to-end (backend Motoko): create/list/update status + auth rules",
+      "synonyms": [
+        "booking domain",
+        "reservation backend",
+        "booking APIs",
+        "booking status workflow"
+      ],
+      "description": "Backend Motoko menambahkan model Booking persisten (id unik, guest principal, hotel principal/identifier, tanggal check-in/check-out, catatan opsional, status, timestamps) beserta enum status (pending/confirmed/rejected/canceled) dan API untuk: guest membuat booking, guest melihat/cancel booking miliknya, hotel melihat & mengelola booking untuk hotelnya, serta admin dapat mengelola semua booking. Authorization memastikan guest hanya mengakses booking miliknya dan hotel hanya booking yang ditujukan ke principal hotel tersebut.",
+      "reqIds": [
+        "AR-40",
+        "AR-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-18",
+      "title": "Guest booking flow dari Browse Hotels (frontend): request booking via dialog dengan RequireAuthenticated gating",
+      "synonyms": [
+        "BookingRequestDialog",
+        "guest booking request UI",
+        "browse-to-book flow"
+      ],
+      "description": "Frontend menambahkan alur booking untuk tamu dari halaman Browse Hotels: tamu dapat membuka dialog/screen booking untuk hotel dan mengirim permintaan booking (tanggal check-in/out + note opsional). Jika belum login, UI menampilkan prompt RequireAuthenticated sebelum submit.",
+      "reqIds": [
+        "AR-40",
+        "AR-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-19",
+      "title": "Booking history untuk tamu di Guest Account (Bookings section + cancel)",
+      "synonyms": [
+        "GuestBookingsSection",
+        "guest bookings list",
+        "cancel booking"
+      ],
+      "description": "Guest Account menambahkan section \"Bookings\" yang menampilkan daftar booking milik caller (nama hotel/identifier, tanggal, status, created-at) dan menyediakan aksi pembatalan untuk booking yang masih diizinkan oleh aturan bisnis (mis. pending).",
+      "reqIds": [
+        "AR-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "Manajemen booking untuk hotel di Hotel Area (list incoming + confirm/reject)",
+      "synonyms": [
+        "HotelBookingsSection",
+        "hotel booking management",
+        "confirm/reject booking"
+      ],
+      "description": "Hotel Area menambahkan section/tab \"Bookings\" yang menampilkan booking masuk untuk principal hotel saat ini dan memungkinkan hotel melakukan confirm/reject dengan aksi tunggal, serta status ter-update di UI.",
+      "reqIds": [
+        "AR-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-21",
+      "title": "Instruksi pembayaran manual untuk booking via email (tanpa payment gateway)",
+      "synonyms": [
+        "BookingPaymentInstructions",
+        "manual booking payment",
+        "email payment instructions"
+      ],
+      "description": "Setelah booking dibuat (atau pada tahap konsisten yang dipilih), frontend menampilkan instruksi pembayaran manual untuk booking: pengguna diminta mengirim email ke sentraguestos.info@gmail.com dengan booking id/reference dan detail terkait. Menggunakan pola UI yang sudah ada (cards/alerts/copy-to-clipboard) tanpa integrasi pihak ketiga.",
+      "reqIds": [
+        "AR-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-22",
+      "title": "React Query hooks untuk booking APIs (create/list/update/cancel) + cache key scoping & invalidation",
+      "synonyms": [
+        "useBookings",
+        "booking react-query hooks",
+        "booking cache invalidation"
+      ],
+      "description": "Frontend menambahkan hooks React Query untuk API booking (create booking, list untuk guest, list untuk hotel/admin, update status, cancel) dengan cache keys yang terscope oleh Principal ID bila relevan dan mekanisme invalidate/refetch query setelah mutasi.",
+      "reqIds": [
+        "AR-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-23",
+      "title": "Panel booking untuk Admin (monitor/manage bookings)",
+      "synonyms": [
+        "AdminBookingsPanel",
+        "admin bookings dashboard"
+      ],
+      "description": "Menambahkan panel admin untuk melihat/mengelola data booking secara global sebagai Admin/Owner (mis. list booking dan tindakan manajemen sesuai hak admin).",
+      "reqIds": [
+        "AR-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-24",
+      "title": "Mekanisme pre-publish review & konfirmasi sebelum deploy/publish (PrePublishGate)",
+      "synonyms": [
+        "pre-publish gate",
+        "changelog before deploy",
+        "PrePublishGateCard"
+      ],
+      "description": "Menambahkan UI/flow untuk menampilkan ringkasan perubahan (changelog) + instruksi verifikasi dan meminta konfirmasi pengguna sebelum proses deploy/publish dijalankan, sebagai kontrol kualitas untuk mengurangi regresi dan kebingungan apakah perubahan sudah ter-publish.",
+      "reqIds": [
+        "AR-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-25",
+      "title": "RequireActorReady + useActorSafe untuk gating kesiapan actor dan mitigasi infinite loading/race condition",
+      "synonyms": [
+        "actor readiness guard",
+        "safe actor hook",
+        "RequireActorReady",
+        "useActorSafe",
+        "RouteDiagnosticsErrorCard"
+      ],
+      "description": "Frontend menambahkan mekanisme gating sebelum halaman/section melakukan call ke canister: hook useActorSafe dan komponen RequireActorReady untuk memastikan actor/auth state siap, serta komponen diagnostik (mis. RouteDiagnosticsErrorCard) untuk membantu mengidentifikasi kegagalan/race condition yang memicu flicker lalu stuck loading pada Admin Panel/Hotel Area/Guest Account/Account Status.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-26",
+      "title": "Admin Hotel Visibility Panel (deactivate/hidden) untuk menyembunyikan hotel demo/test dari Browse Hotels",
+      "synonyms": [
+        "AdminHotelVisibilityPanel",
+        "hotel visibility admin control",
+        "deactivate hotel",
+        "hide from directory",
+        "useHotelVisibilityAdmin"
+      ],
+      "description": "Frontend menambahkan panel admin untuk mengelola visibilitas hotel (mis. menonaktifkan/menyembunyikan hotel tertentu agar tidak tampil di direktori/browse publik). Disertai hook useHotelVisibilityAdmin sebagai jalur kontrol admin untuk kebutuhan operasional seperti data seed/demo/testing agar tidak mengganggu production.",
+      "reqIds": [
+        "AR-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-27",
+      "title": "Panel Error Boundary & routing diagnostics untuk mencegah UI blank saat backend/actor error",
+      "synonyms": [
+        "PanelErrorBoundary",
+        "RouteDiagnosticsErrorCard",
+        "error boundary admin/guest/hotel"
+      ],
+      "description": "Frontend menambahkan error boundary per-panel (PanelErrorBoundary) dan kartu diagnostik routing/error (RouteDiagnosticsErrorCard) agar kegagalan call canister/actor (mis. trap, rejection, timeout) tidak membuat halaman menjadi blank; error ditampilkan dengan konteks yang membantu troubleshooting tanpa merusak baseline akses Admin/Hotel/Guest.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-28",
+      "title": "Fondasi pilihan kamar (room types) & inventory: manajemen kamar oleh hotel + dialog pilihan kamar untuk tamu",
+      "synonyms": [
+        "room selection",
+        "room types",
+        "room inventory",
+        "HotelRoomsManager",
+        "GuestHotelRoomsDialog",
+        "useRoomInventory"
+      ],
+      "description": "Frontend menambahkan fondasi fitur kamar: (1) komponen HotelRoomsManager untuk hotel mengelola daftar/tipe kamar (room inventory) di Hotel Area, (2) dialog GuestHotelRoomsDialog untuk menampilkan/pilih kamar dari sisi tamu (sebagai landasan integrasi ke flow booking), serta (3) hook useRoomInventory untuk fetch/mutasi data kamar melalui actor backend. Implementasi ini menyiapkan AR-64 tanpa mengubah alur pembayaran/booking yang masih manual via email.",
+      "reqIds": [
+        "AR-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-actor-readiness-gating-to-verify-backend-liveness-by-calling-the-new-backend-health-endpoint-after-actor-creation-inside-useactorsafe-and-treat-any-failure-timeout-rejection-replica-error-as-a-terminal-user-visible-connection-error-via-existing-diagnostics-ui-no-infinite-loading",
+      "title": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-no-app-route-depends-on-the-legacy-blocking-actor-hook-frontend-src-hooks-useactor-ts-for-initial-page-render-migrate-any-remaining-usage-in-pages-components-to-useactorsafe-requireactorready-so-a-stopped-backend-cannot-cause-cascading-failures-or-blank-panels",
+      "title": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-stopped-canister-diagnostics-message-english-ui-copy-to-include-1-the-detected-canister-id-if-present-in-the-error-text-2-a-clear-statement-that-the-backend-is-stopped-and-3-actionable-next-steps-for-the-operator-admin-retry-hard-refresh-open-troubleshooting-without-exposing-internal-stack-traces-by-default",
+      "title": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-lightweight-regression-test-plan-entry-update-frontend-regression-checklist-md-specifically-for-the-stopped-backend-scenario-to-verify-route-access-retry-behavior-troubleshooting-navigation-and-that-access-control-initialization-warnings-do-not-block-non-admin-user-flows-when-backend-is-healthy",
+      "title": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Bangun aplikasi booking dan reservasi hotel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Sistem rating publik: tamu dapat memberi rating untuk hotel (fasilitas & pelayanan)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Sistem reputasi publik untuk tamu: hotel dapat memberi rating/label (termasuk label merah untuk tamu bermasalah) yang bisa dicek publik",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Tambahkan mekanisme pencegahan penyalahgunaan reputasi negatif (mis. label merah) termasuk alasan/bukti transaksi dan proses banding/dispute untuk mengurangi risiko fitnah dan risiko hukum",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Rancang alur/flow aplikasi (user journey) untuk booking/reservasi + autentikasi Internet Identity + reputasi dua arah termasuk label negatif & proses dispute, tanpa eksekusi/implementasi kode dulu",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Dukungan penggunaan internasional (internationalization) untuk aplikasi booking/reservasi & reputasi (mis. multi-bahasa, multi-mata uang, dan penyesuaian regulasi per negara)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Fitur/konsep kemitraan komunitas/asosiasi (mis. PHRI): onboarding/penandaan hotel anggota dan mekanisme transparansi reputasi untuk mendorong persaingan layanan antar anggota",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Tentukan model bisnis/monetisasi: apakah hotel dikenakan biaya untuk menggunakan sistem (mis. subscription, fee per booking, freemium)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Tentukan dan rancang scope MVP (fitur minimum versi pertama) yang tetap international-ready (domestik + internasional) sejak rilis awal",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Dukungan pembayaran untuk hotel (subscription/fitur berbayar) via PayPal dan metode lokal Indonesia seperti GoPay & DANA",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Branding & identitas produk: nama Sentra Guest OS (SGO), email kontak sentraguestos.info@gmail.com, ubah footer text menjadi \"Develop Sentra Guest Os (SGO)\", serta pertahankan warna logo (jangan diubah)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Klasifikasi hotel wajib: bintang 1-5 dan kelas melati, ditampilkan agar tamu mengetahui kelas hotel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Lokasi hotel wajib terhubung peta (maps) agar tamu dapat melihat alamat/lokasi hotel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Hotel dapat upload logo untuk profil; direktori/browse hotel menampilkan logo hotel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Saat daftar hotel wajib mengisi asal negara; tamu dapat mencari/memfilter hotel berdasarkan negara",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Preferensi komunikasi/UX: gunakan Bahasa Indonesia untuk komunikasi utama dengan pengguna (minimal untuk interaksi/dukungan)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Remove email as a required/collected field for user accounts and update the data model and UI so user profiles are based on Internet Identity (Principal ID) plus non-sensitive fields only (e.g., display name and country). Ensure all profile-related UI copy and validation no longer references or requires email.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Enable bilingual UI (minimum: Indonesian and English) with a language switcher and translations for all current user-facing screens and key components (Guest Area, Browse Hotels, Hotel Area, profile/account screens, and payment/manual instructions).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Make the Guest vs Hotel entry points unambiguous: provide clearly labeled navigation/links so guests can browse publicly while hotel onboarding is gated via invite link, and ensure routes/UX reflect the separation.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Update all user-facing text introduced/modified by this build so it is written in English (and also available in Indonesian via the new i18n system). Ensure any new screens (invite gating, account, stay history, manual payment) have polished, consistent English copy.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Admin dapat menghapus/menonaktifkan (deactivate) data hotel contoh/test agar tidak mengganggu tamu di production; termasuk opsi soft-delete + penanda 'test/demo' untuk data seed",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-48",
+      "summary": "Subscription hotel berbasis bulanan; admin dapat menonaktifkan (deactivate) hotel yang tidak membayar agar tidak terlihat oleh tamu, termasuk dukungan hotel dummy/test yang bisa disembunyikan dari publik",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Perbaiki UI Admin Panel untuk Hotel Invite Token agar stabil (token list tidak hilang/muncul, tidak perlu logout-login; perbaiki refetch/invalidation/state loading)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Finalisasi Profil Hotel agar siap produksi (validasi & sinkronisasi field kelas/bintang, negara, maps/lokasi, logo) dan lakukan uji ulang flow booking end-to-end setelah profil hotel stabil",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Perjelas kontrol & indikator visibilitas hotel di Admin Panel: tampilkan label status (ACTIVE/INACTIVE, TEST/DUMMY, PUBLIC/HIDDEN) dan sediakan aksi/tombol jelas untuk mengaktifkan hotel agar muncul di Browse Hotels (guest view) + pesan alasan bila guest tidak melihat hotel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-52",
+      "summary": "Audit and fix backend Motoko admin APIs used by the Admin Panel section \"Hotel Visibility & Subscription Management\" so that backend calls never cause the frontend to go blank due to traps, missing data, or inconsistent response shapes. Focus specifically on hotel visibility/subscription-related queries and mutations.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Add a dedicated admin-only query API that returns hotels together with their principals and visibility/subscription metadata in one call (to avoid per-hotel fan-out calls). The response must include: hotel Principal, HotelProfile, and a non-optional visibility view (with safe defaults when absent).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Harden existing hotel visibility mutation APIs to be consistent with the new admin query and to avoid creating inconsistent states (e.g., ensure all required flags are always set, and ensure updates work even if a hotel visibility record did not previously exist).",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Add backend-level defensive handling for legacy/partial data where HotelProfile exists but related visibility metadata is missing, so that the admin panel cannot be broken by older state. Do not change guest-facing filtering rules (guests still see only active+paid+non-dummy hotels).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Audit and harden all backend Motoko functions used by the Admin Panel section \"Hotel Visibility & Subscription Management\" so they never trap due to missing/legacy/partial state (e.g., HotelProfile exists but HotelVisibility record is absent). Ensure these admin APIs always return a consistent response shape and use safe defaults when visibility/subscription metadata is missing.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Add a dedicated admin-only query API in backend/main.mo that returns all hotels together with their Principal IDs and their visibility/subscription metadata in one call (to avoid per-hotel fan-out calls). The response must include: hotel Principal, HotelProfile, and a non-optional visibility view (with safe defaults when absent).",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Harden backend hotel visibility/subscription mutation APIs so they cannot create inconsistent visibility state when called for a hotel that does not yet have a visibility record. Ensure mutations initialize missing visibility records using the same safe-default strategy as the new admin query and then apply the requested update.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Preserve guest-facing hotel visibility and booking filtering behavior: guests must still only see hotels that are active + paid + not dummy/test, and guests must not gain access to admin-only visibility/subscription data as part of the backend changes.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-60",
+      "summary": "Lengkapi Akun Tamu (Guest Account) yang belum selesai/masih kurang fitur, tanpa mengganggu Panel Admin dan fitur yang sudah stabil",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-61",
+      "summary": "Tambahkan kalender (calendar) untuk kebutuhan booking/reservasi (mis. pilih tanggal & ketersediaan) dengan tetap menjaga stabilitas fitur lain",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-62",
+      "summary": "Tambahkan dashboard analitik (analytics dashboard) untuk kebutuhan monitoring/performa (kemungkinan untuk hotel/admin), tanpa mengganggu Panel Admin yang sudah lancar",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-63",
+      "summary": "Tambahkan notifikasi email (email notifications) untuk event penting (mis. booking dibuat/diubah status), dengan syarat tidak mengganggu fitur lain dan tetap menjaga privacy-by-design",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-65",
+      "summary": "Dukungan harga kamar multi-mata uang (mis. IDR/USD) + pilihan currency di input harga dan display yang benar agar tidak salah tafsir (contoh 800000 IDR tidak tampil sebagai $800000).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-66",
+      "summary": "Booking harus menyertakan pilihan tipe kamar (room type) yang jelas: tamu memilih kamar saat booking, dan pilihan tersebut tersimpan/terlihat di sisi tamu & hotel (menghindari booking tanpa tahu kamar apa yang dipilih).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-67",
+      "summary": "Perbaiki bug booking yang masih 'failed' saat tamu sudah pilih tanggal tetapi submit tidak bisa/berakhir error (fokus stabilisasi booking end-to-end).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-68",
+      "summary": "Perbaiki UX daftar kamar di sisi tamu: tampilkan indikator/ceklist untuk kamar yang dipilih dan dukung skenario hotel memiliki lebih dari satu kamar/tipe kamar yang diposting.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-69",
+      "summary": "Fix the guest booking submission failure shown in the provided screenshot (runtime error: \"Cannot read properties of undefined (reading 'processError')\"). Ensure the booking request dialog never crashes while handling errors and always renders a safe, user-friendly error message when booking creation fails.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-70",
+      "summary": "Introduce currency support for room pricing so that room prices are not always displayed with a \"$\" prefix. Add a currency field to the room inventory model and update all room price input and display paths to format amounts correctly for the selected currency (minimum: IDR and USD).",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-71",
+      "summary": "Update the booking domain so each booking request includes the selected room type. Require the guest to choose a room type during booking creation, persist the chosen room type in the backend booking record, and display it on both guest and hotel booking lists/details.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-72",
+      "summary": "Improve the guest room list UX to clearly indicate the currently selected room type (show a checkmark/selected indicator) and handle hotels that have multiple posted room types. The selection indicator must update immediately when the user changes the selected room.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-73",
+      "summary": "Add/adjust backend migration logic (backend/migration.mo) if required to safely upgrade existing persisted hotel room inventory and booking records after introducing new fields (currency on rooms; roomType on bookings). The upgrade must not trap on legacy data.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-74",
+      "summary": "Perluas manajemen kamar (room inventory) di akun hotel: input/edit room type, upload foto kamar, harga, dan kolom promo; serta pastikan bisa diedit stabil tanpa flicker.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-75",
+      "summary": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning a small, stable response (at minimum: a boolean `ok` plus a `timestamp` from `Time.now()`), and ensure it cannot trap for anonymous callers.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "status": "pending"
+    }
+  ],
+  "architectural_notes": [
+    "Tidak mengumpulkan data identitas resmi tamu (mis. KTP/Paspor); identitas berbasis Internet Identity/Principal ID dan reputasi bersifat publik.",
+    "Prioritaskan kepatuhan hukum & privacy-by-design: identitas tetap pseudonymous via Principal ID; hindari pengumpulan data pribadi; untuk penilaian/label negatif wajib ada justifikasi dan bukti transaksi serta mekanisme dispute/banding untuk mencegah penyalahgunaan.",
+    "Pertimbangkan sejak awal target penggunaan internasional: kebutuhan i18n (multi-bahasa), dukungan multi-mata uang & zona waktu, serta kepatuhan/regulasi berbeda per negara terkait reputasi publik dan dispute.",
+    "Persyaratan produk: sejak rilis awal harus siap dipakai domestik dan internasional (international-ready from day one), bukan fitur tahap lanjut.",
+    "Kebutuhan i18n: dukungan multi-bahasa sejak awal mencakup minimal Inggris, Arab, Mandarin/Cina, Jepang, Rusia, Jerman, Korea (dapat diperluas).",
+    "Perluasan konsep kemitraan asosiasi: selain PHRI (Indonesia), pertimbangkan pemetaan/kolaborasi dengan asosiasi perhotelan di negara lain sebagai 'quality/association signal' opsional untuk hotel.",
+    "Desain reputasi negatif sebaiknya memakai status bertingkat (mis. Good/Warning/Restricted) alih-alih 'label merah permanen', dan tetap mensyaratkan bukti transaksi + mekanisme dispute/banding.",
+    "Peran asosiasi (mis. PHRI dan asosiasi perhotelan global) diposisikan sebagai 'quality/association signal' opsional (badge/verified member), bukan pengendali identitas atau pengumpul data.",
+    "Model monetisasi yang disarankan: tamu gratis; hotel berbayar (subscription tier seperti Free/Pro/Premium) dengan opsi transaction fee kecil bila pembayaran terjadi di dalam sistem.",
+    "Untuk mengurangi risiko hukum internasional, ulasan/komentar sebaiknya dibatasi dan lebih terstruktur (skor + kategori), menghindari narasi panjang yang berpotensi fitnah; istilah/status reputasi distandarkan lintas bahasa.",
+    "Perlu pemisahan onboarding berbasis role (tamu vs hotel): tamu boleh self-signup publik, sedangkan hotel harus via undangan (invite link/kode) yang unik dan sekali pakai/bermasa berlaku untuk mencegah penyalahgunaan dan mendukung monetisasi.",
+    "Perlu payment gateway/integrasi pembayaran untuk paket berbayar hotel, mencakup metode internasional (mis. PayPal) dan metode lokal Indonesia (mis. GoPay, DANA).",
+    "Tahap proyek telah bergeser dari sekadar perancangan flow/UX menjadi implementasi scaffold MVP (React frontend + Motoko backend) menggunakan build template.",
+    "Frontend menggunakan pola actor (hook useActor) untuk komunikasi ke canister backend, dengan komponen auth/guard (RequireAuthenticated) dan halaman area terpisah (Guest/Hotel).",
+    "Fondasi alur pembayaran/subscription sudah ada di layer UI (pemilihan metode, instruksi, review admin); integrasi gateway/payment settlement end-to-end masih perlu dipastikan/dituntaskan.",
+    "Project diberi nama \"Sentra Guest OS (SGO)\" dengan email kontak sentraguestos.info@gmail.com; footer/credit harus menampilkan \"Develop Sentra Guest Os (SGO)\" dan warna logo tidak boleh diubah.",
+    "Perlu dukungan PWA/responsive: aplikasi harus dapat digunakan di laptop & mobile, dapat di-install di mobile tanpa app store (khususnya Android), dan tetap bisa diakses melalui browser umum (Chrome/Safari/Edge/Bing).",
+    "Model data hotel perlu menambahkan atribut: kelas hotel (bintang 1–5/melati), negara asal/negara lokasi, lokasi peta (koordinat/tautan maps), serta aset logo hotel untuk ditampilkan di direktori tamu.",
+    "Untuk transparansi identitas tanpa email/PII, UI akun perlu menampilkan Principal ID pengguna (copy/share) sebagai identitas pemilik akun.",
+    "Tambahkan mode pembayaran/aktivasi manual via email sebagai fase awal sebelum integrasi gateway end-to-end (PayPal/GoPay/DANA).",
+    "Keputusan: untuk fase awal, pembayaran/aktivasi subscription hotel dilakukan manual via email (sentraguestos.info@gmail.com); integrasi gateway (PayPal/GoPay/DANA) menyusul.",
+    "Perlu role Owner/Admin (pemilik) yang dapat membuat & membagikan invite link/kode khusus untuk onboarding hotel (sekali pakai/bermasa berlaku), serta melakukan verifikasi & aktivasi/upgrade subscription hotel secara manual.",
+    "Eksekusi fitur besar dilakukan bertahap (per tahap/iterasi) karena proses build otomatis dapat gagal bila permintaan terlalu kompleks dalam satu langkah; tetap targetkan kelengkapan sesuai requirement, hanya dipecah menjadi beberapa tahap implementasi.",
+    "Implementasi onboarding hotel kini berbasis token undangan sekali pakai yang divalidasi server-side (backend Motoko) dan di-gate di UI Hotel Area; admin/owner memiliki panel untuk membuat dan memonitor status token (unused/used) beserta metadata waktu.",
+    "Aplikasi menambahkan fondasi PWA (manifest + service worker + registrasi) untuk mendukung instalasi dan penggunaan responsif lintas perangkat via browser.",
+    "Owner/Admin ditentukan berdasarkan Principal ID yang melakukan login pertama kali (first-login becomes owner).",
+    "Ditambahkan mekanisme recovery/reset akses Owner/Admin untuk kasus Principal ID berbeda dari first-login; membutuhkan dukungan endpoint di backend dan UI khusus (ResetAdminAccessCard) untuk memulihkan akses admin.",
+    "Tambahkan langkah wajib sebelum publish/deploy: tampilkan ringkasan perubahan (changelog) + instruksi verifikasi, dan minta konfirmasi user; idealnya dukung link preview/staging untuk dicek sebelum production.",
+    "Ditambahkan UI diagnostik/troubleshooting di area akun untuk meningkatkan kejelasan identity berbasis Principal ID dan deteksi role Owner/Admin (mengurangi kebingungan terkait Internet Identity, perbedaan Principal ID lintas perangkat, serta isu cache/PWA/deploy URL).",
+    "Build template & core infrastructure diperbarui secara besar (sinkronisasi file build-template, pnpm workspace, Dockerfile, deploy scripts, ICP config) sebagai fondasi build/deploy yang lebih stabil.",
+    "Frontend template menambahkan/menyinkronkan banyak komponen UI (shadcn-ui) dan utilitas pendukung (Tailwind/Vite config) sebagai standar design system proyek.",
+    "Ditambahkan/diaktifkan custom ESLint rules terkait integrasi Internet Identity (mis. memastikan provider II dipakai) dan pembatasan penggunaan BigInt pada query keys untuk menghindari bug/inkonsistensi cache.",
+    "Keputusan akses admin: sistem hanya memiliki 1 Owner/Admin aktif berbasis Principal ID. Saat dilakukan reset/pemulihan admin, Principal ID yang melakukan reset menjadi Owner/Admin baru dan akses admin Principal ID sebelumnya dicabut (pengguna lain tidak bisa mengakses panel admin).",
+    "Role indicator/entry point Admin kini terlihat di UI: ada tombol/menu \"Admin\" di bagian atas ketika login dengan Internet Identity yang terdeteksi sebagai Admin.",
+    "Admin/Owner saat ini efektif terikat pada Internet Identity yang digunakan user saat login melalui akun Google/email sentraguestos.info@gmail.com; login via akun lain (pasardigital.ina@gmail.com, lucky.jamaludin@gmail.com, sentraguest.os@gmail.com) terdeteksi sebagai pengguna biasa (non-admin).",
+    "Klarifikasi operasional Internet Identity: pada perangkat yang sama (mis. 1 laptop), membuka browser berbeda atau menggunakan akun Google berbeda dapat menghasilkan Internet Identity/Principal ID berbeda; hak Admin/Owner tetap ditentukan oleh Principal ID, bukan perangkat atau email.",
+    "Klarifikasi operasional: tombol/menu Admin akan muncul di perangkat mana pun (termasuk HP) selama login menggunakan Internet Identity/Principal ID yang sama dengan Owner/Admin; perbedaan akun Google/profile browser dapat menghasilkan Principal ID berbeda sehingga status Admin bisa berbeda meski perangkat sama.",
+    "UX/security decision: Non-admin users should only see Account Status in read-only form (e.g., Principal ID + role badge USER). Any admin controls—especially Reset Admin Access—must be hidden/disabled for non-admins. Reset Admin Access remains available to Admin only, since it transfers Owner/Admin rights at the application level (not a 'normal user' admin).",
+    "Workflow eksekusi/implementasi harus dilakukan bertahap (step-by-step): kerjakan 1 pekerjaan kecil per iterasi, lalu deploy/publish setelah selesai, kemudian lanjut pekerjaan berikutnya untuk menghindari kegagalan build/deploy saat permintaan terlalu besar.",
+    "Fondasi stay history: catatan riwayat menginap dibuat/dikelola oleh pihak Hotel/Admin dan ditautkan ke Guest Principal ID + Hotel Principal ID (bukan klaim mandiri tamu), sehingga riwayat dapat diverifikasi berbasis entri valid.",
+    "Booking/reservasi MVP diimplementasikan tanpa payment gateway: pembayaran dilakukan manual via email dengan referensi booking id, memanfaatkan komponen instruksi pembayaran yang konsisten.",
+    "Keputusan eksekusi: tunda implementasi fitur baru (Step 3 Booking/Reservasi) sampai akses dasar stabil; fokus penuh pada perbaikan Admin Panel + Hotel Area (mengatasi infinite loading/regresi role gating) sebelum melanjutkan fitur berikutnya.",
+    "Ditambahkan mekanisme pre-publish gate di UI (PrePublishGate) untuk menampilkan ringkasan perubahan + checklist verifikasi dan meminta konfirmasi sebelum deploy/publish, sebagai guardrail regresi.",
+    "Keputusan UX tambahan: tampilan/halaman untuk Admin vs User harus benar-benar berbeda (bukan hanya menyembunyikan tombol). User non-admin melihat Account Status read-only (Principal ID + role USER) tanpa menu/fitur pemulihan/reset admin; fitur pemulihan/reset admin dan menu Admin hanya muncul untuk Admin.",
+    "Temuan baru setelah v21: beberapa halaman sempat render lalu kembali loading (flicker) menandakan kemungkinan race condition/invalidasi state auth/role atau actor lifecycle (recreate actor / query refetch) yang menyebabkan UI reset ke state loading; perlu baseline stabil + regression-proof sebelum lanjut fitur baru.",
+    "Ditambahkan pola 'actor readiness gating' di frontend (RequireActorReady + useActorSafe) untuk menghindari race condition/auth resolution yang menyebabkan UI flicker lalu kembali loading/infinite loading; disertai komponen diagnostik routing/error untuk mempercepat investigasi isu akses.",
+    "Keputusan eksekusi terbaru: fokus stabilisasi 3 titik akses inti saja sebelum lanjut fitur baru: (1) Admin Panel harus bisa dibuka stabil, (2) Hotel Area harus bisa dibuka stabil, (3) Guest Account harus tampil stabil (tanpa infinite loading/flicker).",
+    "Ditambahkan dokumen/artefak checklist regresi (frontend/REGRESSION_CHECKLIST.md) sebagai panduan verifikasi sebelum deploy untuk mencegah fitur hilang/infinite loading kembali.",
+    "Baseline stabil (v22): fokus 3 titik akses inti (Admin Panel, Hotel Area, Guest Account) harus lulus sebelum melanjutkan fitur baru; setelah stabil, lanjut implementasi Step 3 Booking/Reservasi dasar (draft v23).",
+    "Kebutuhan operasional: data contoh/seed (mis. 1 hotel demo untuk memicu flow booking) harus dapat dibersihkan setelah testing. Disarankan gunakan soft-delete/deactivate dan/atau flag 'test/demo' agar tidak tampil di Browse Hotels publik, serta sediakan kontrol Admin untuk purge data test.",
+    "Ditambahkan kontrol Admin untuk mengelola visibilitas hotel (mis. hide/deactivate) guna kebutuhan operasional data demo/test agar tidak muncul di Browse Hotels/area publik.",
+    "Keputusan monetisasi operasional: subscription hotel bersifat bulanan; jika hotel tidak membayar, Admin dapat menonaktifkan hotel (active/inactive) sehingga tidak tampil di Browse Hotels publik dan tidak bisa dibooking.",
+    "Operasional testing: dukung hotel dummy/test dengan flag TEST/DUMMY + visibilitas nonaktif/tersembunyi dari tamu; setelah testing cukup dinonaktifkan (bukan hard delete) agar tidak mengganggu production.",
+    "Untuk uji coba hotel contoh/dummy: Admin harus generate invite token di Admin Panel, lalu onboarding hotel dilakukan dengan Principal ID/akun Internet Identity lain (akun terpisah dari Admin) agar role Hotel terikat ke principal tersebut. Setelah testing, hotel dummy bisa dinonaktifkan/ditandai TEST agar tidak tampil ke tamu.",
+    "Kebijakan visibilitas hotel untuk Guest/Browse: guest hanya melihat hotel yang memenuhi kriteria publik (mis. active=true, bukan TEST/DUMMY, dan/atau status public). Admin dapat melihat semua hotel terlepas dari status; karena itu UI Admin perlu menampilkan status visibilitas secara eksplisit dan menyediakan aksi aktivasi/nonaktif yang jelas agar tidak membingungkan saat hotel tidak muncul di sisi guest.",
+    "Keputusan eksekusi (terbaru): hentikan penambahan fitur dan fokus tunggal membuktikan Admin Panel dapat dibuka stabil tanpa infinite loading di skenario penggunaan normal; jika belum tercapai, jangan lanjut ke sinkronisasi visibilitas hotel/booking.",
+    "Keputusan eksekusi terbaru: fokus perbaikan Admin Panel pada section \"Hotel Visibility & Subscription Management\" yang loading lalu blank, dengan penekanan investigasi di backend (Motoko/canister APIs, role/visibility/subscription queries) karena indikasi masalah berasal dari respon backend yang gagal/invalid sehingga frontend menghilang.",
+    "Keputusan terbaru: untuk isu Admin Panel blank/loading (khususnya section \"Hotel Visibility & Subscription Management\"), lakukan diagnosis/penjelasan penyebab terlebih dulu tanpa menjalankan build/deploy; fokus investigasi diarahkan ke backend query/response yang diduga memicu frontend menjadi blank.",
+    "Arahan user: fokus perbaikan/diagnosis ada di backend (Motoko/canister) untuk isu Admin Panel blank/loading; jangan menghabiskan iterasi di frontend sebelum backend query/response (hotel visibility & subscription) dipastikan aman (tidak trap, punya default/fallback, dan response shape konsisten).",
+    "Konfirmasi user: setelah perbaikan backend terbaru (v36), Admin Panel kembali muncul/ter-render (khususnya area yang sebelumnya blank: \"Hotel Visibility & Subscription Management\").",
+    "Keputusan/constraint terbaru: Panel Admin sudah lancar dan tidak boleh terganggu; setiap pekerjaan baru harus menjaga baseline stabil dan tidak menyebabkan regresi pada Admin Panel maupun fitur Hotel Area yang sudah beres (logo/foto sudah OK).",
+    "Keputusan eksekusi terbaru: mulai pengerjaan dari Akun Tamu (Guest Account) sebagai fondasi agar bisa melakukan reservasi/booking; pekerjaan ini tidak boleh mengganggu/merusak Panel Admin dan area lain yang sudah stabil.",
+    "Ditambahkan error boundary per-panel (PanelErrorBoundary) + routing diagnostics (RouteDiagnosticsErrorCard) untuk mencegah kondisi UI blank ketika call backend/actor gagal; error ditangkap dan ditampilkan aman agar baseline akses tidak regresi.",
+    "Ditambahkan fondasi 'room inventory/room types' di frontend (HotelRoomsManager + GuestHotelRoomsDialog + useRoomInventory) sebagai basis fitur pilihan kamar pada booking; perlu verifikasi integrasi end-to-end ke domain booking di backend bila belum tersambung.",
+    "Sinkronisasi/upgrade build-template & core infrastructure: component:authorization v4.0.0, component:invite-links v3.0.0, component:core-infrastructure v1.0.2, termasuk pembaruan Dockerfile/deploy scripts/ICP config/pnpm workspace untuk stabilitas build & deploy.",
+    "Pipeline aset PWA/logo kini mencakup skrip prune/resize image di build-template dan menghasilkan ikon PWA ter-standar (apple-touch-icon, maskable, dll) yang disimpan di frontend/public/assets/generated.",
+    "Tambahkan health-check/guard pasca-deploy untuk memastikan backend canister RUNNING (bukan STOPPED) sebelum UI menganggap aplikasi siap; jika STOPPED tampilkan error state yang jelas dan hindari infinite loading di seluruh panel."
+  ],
+  "known_issues": [
+    "Pengguna melaporkan aplikasi belum terasa siap digunakan: fitur multi-bahasa belum tersedia/aktif meskipun requirement international-ready sejak awal.",
+    "Pengguna melaporkan 'akun pengguna' belum ada/kurang jelas (UI/flow untuk akun/profil tamu berbasis Principal ID belum terlihat).",
+    "Fitur riwayat menginap/booking history untuk akun tamu belum tersedia/terlihat jelas.",
+    "Build/generate gagal saat menjalankan permintaan eksekusi 'kerjakan 1 sampai 10' dengan error: \"AI couldn't process your request successfully. Try simplifying or rewording it.\" (permintaan terlalu kompleks/processing issue).",
+    "Asisten masih beberapa kali merespons dalam bahasa Inggris meskipun pengguna meminta komunikasi Bahasa Indonesia.",
+    "Build/generate kembali gagal walaupun pengguna sudah meminta eksekusi bertahap (step-by-step); error muncul lagi: \"The AI couldn't complete your request. Please try rephrasing or simplifying it.\"",
+    "Akses & deteksi role Admin/Owner membingungkan: pengguna tidak yakin apakah panel admin memang hanya untuk dirinya, dan bagaimana memastikan akun yang sedang login terdeteksi sebagai Admin/Owner (kemungkinan masalah UI/UX role indicator atau penetapan owner).",
+    "Pengguna bingung apakah perubahan harus di-'publish' dulu agar terlihat, dan membutuhkan panduan/UX yang lebih jelas terkait status deploy/publish serta cara melihat versi terbaru.",
+    "Pengguna sudah login tetapi tidak menemukan perubahan/fitur terbaru di aplikasi (kemungkinan masalah cache/refresh, salah URL deployment, atau perbedaan Internet Identity/Principal ID yang dipakai saat login).",
+    "Panel Admin tidak muncul setelah login; kemungkinan akun yang login tidak terdeteksi sebagai Owner/Admin (mis. Principal ID berbeda dari first-login), atau masalah UI routing/role indicator/caching/deploy URL.",
+    "User mengira 'login pertama pakai email' (mis. akun Google) memengaruhi role; kemungkinan terjadi perbedaan Internet Identity/Principal ID antara sesi/perangkat sehingga panel Admin tidak muncul (owner ditetapkan oleh first-login Principal ID). Perlu UX yang menjelaskan bahwa sistem tidak memakai email, melainkan Principal ID, serta cara memastikan memakai identity yang sama.",
+    "Panel Admin/Owner tidak muncul meskipun user merasa login dengan akun/Internet Identity yang sama (first-login) di handphone; kemungkinan terkait perbedaan Internet Identity/Principal ID yang terpilih, cache/PWA, atau UI tidak menampilkan indikator role/admin entry point dengan jelas di mobile.",
+    "User meminta setiap perubahan dijelaskan dulu sebelum proses publish/deploy; kebutuhan workflow pre-publish confirmation belum tersedia/terstandar.",
+    "User bingung cara login Internet Identity: mengira perlu email atau 'pay key/passkey', dan tidak tahu passkey mana yang dipakai; perlu UX/teks panduan login yang lebih jelas (email tidak dipakai untuk login aplikasi, gunakan Internet Identity + passkey/biometrik/perangkat).",
+    "User masih tidak menemukan Panel Admin meskipun sudah hapus cache/data browser dan mencoba login dengan beberapa akun Google berbeda; menunjukkan penetapan/pendeteksian Owner/Admin berbasis Principal ID masih bermasalah atau UX entry point admin tidak terlihat.",
+    "Kebingungan berulang soal proses login Internet Identity: user mengira harus memakai email untuk masuk karena layar II menampilkan opsi Google/akun email; perlu edukasi/UX yang lebih eksplisit bahwa email hanya metode autentikasi II dan yang dipakai aplikasi adalah Principal ID.",
+    "Reset/set-ulang admin (yang dideploy di Versi 7) diduga belum efektif atau tidak terverifikasi oleh user; admin panel tetap tidak muncul setelah langkah reset.",
+    "Panel Admin/Owner dan indikator Principal ID masih tidak muncul untuk user meskipun sudah login dan sudah dilakukan set ulang admin (Versi 7) serta penyesuaian lanjutan (Versi 8); perlu investigasi lebih lanjut (kemungkinan routing/role gating/actor call gagal, salah environment/deploy URL, atau state owner tidak tersimpan/terbaca).",
+    "Panel Admin/Owner dan indikator Principal ID masih tidak muncul meskipun user login via Internet Identity menggunakan Google di HP dan sudah berulang kali membersihkan cache/histori/data browser (issue kemungkinan bukan cache semata; perlu investigasi lebih lanjut pada deteksi role/owner, routing/gating UI, atau actor call).",
+    "User melaporkan kembali: setelah login, masih ada kondisi di mana tombol/menu \"Admin\" tidak muncul (role indicator/admin entry point tidak konsisten atau tidak ter-render), meskipun sebelumnya sempat muncul pada akun/Principal ID tertentu.",
+    "User masih bingung soal perbedaan Principal ID saat membuka beberapa browser/akun Google berbeda pada laptop yang sama; admin hanya muncul pada satu Principal ID tertentu sehingga di browser/akun lain tidak ada tombol/menu Admin.",
+    "Deploy/publish lambat dan sempat gagal pada Version 15 (\"Live deployment unsuccessful: Deployment failed\"); perlu investigasi pipeline deploy, logs, dan stabilitas proses rilis.",
+    "User tidak mendapatkan link live/URL produksi; dari tadi hanya loading (kemungkinan deploy belum selesai, URL salah/tidak dibagikan, atau masalah jaringan/cache/PWA).",
+    "User tidak mendapatkan link live/URL produksi untuk Step 1 (Draft Version 16); halaman hanya loading terus (indikasi deploy/staging link bermasalah atau deploy belum selesai/stabil).",
+    "User melaporkan link live/production masih loading terus (kemungkinan deploy/hosting belum stabil, URL salah, atau masalah caching/PWA/service worker); perlu investigasi status deploy Version 17 dan kesehatan endpoint live.",
+    "Regresi akses setelah beberapa deploy (sekitar v18–v19): Guest Account/Profile tidak bisa dibuka, Hotel Area tidak bisa dibuka (infinite loading), dan tombol/menu Admin + Admin Panel sempat hilang/tidak bisa diakses.",
+    "Fitur Step 3 (Booking/Reservasi dasar) belum terimplementasi/ belum muncul di aplikasi meskipun sempat disebut akan dikerjakan; perlu penjadwalan ulang setelah stabilisasi akses selesai.",
+    "Kesulitan akses link live/preview pada beberapa versi (mis. v16) dengan gejala halaman hanya loading terus; indikasi masalah deploy/link/hosting atau state aplikasi yang belum stabil.",
+    "Regresi berulang setelah beberapa deploy terbaru (sekitar v20): Hotel Area kembali infinite loading dan Admin Panel juga infinite loading meski sebelumnya sempat OK/stabil.",
+    "Regresi UI akun tamu: section/fitur \"Riwayat Nginap/Stay History\" yang sebelumnya terlihat kini hilang setelah deploy terbaru.",
+    "Perubahan/deploy step-by-step masih mengorbankan fitur yang sudah berjalan (regression not prevented); butuh kontrol regresi/validasi sebelum deploy agar fitur lama tidak hilang.",
+    "Konfirmasi terbaru user: Admin Panel dan Hotel Area masih infinite loading (tidak bisa dibuka) meskipun sebelumnya sempat OK; regresi akses belum terselesaikan.",
+    "User melaporkan fitur/section yang sebelumnya sudah muncul (mis. Riwayat Nginap/Stay History di akun tamu) kini hilang lagi setelah deploy terbaru; menunjukkan regresi fitur berulang.",
+    "User menilai proses step-by-step + deploy berulang tidak menghasilkan perubahan yang terlihat dan justru menambah masalah baru; perlu strategi stabilisasi/regression-proof sebelum deploy berikutnya.",
+    "Regresi berulang: setelah beberapa deploy, Admin Panel dan Hotel Area kembali infinite loading, dan beberapa elemen UI (mis. tombol Admin, riwayat nginap) bisa hilang/muncul; perlu review menyeluruh dan baseline stabil sebelum lanjut fitur baru.",
+    "User melaporkan setelah rilis Step 3 (Draft/Live v23) fitur booking/reservasi tidak ditemukan di UI: tidak muncul di Hotel Area, Guest Account, maupun Browse Hotels; perlu investigasi entry point/visibility, role gating, dan/atau prasyarat data (mis. hotel belum terdaftar/aktif sehingga tombol booking tidak muncul).",
+    "Risiko operasional: untuk menguji flow booking dibutuhkan data hotel contoh; tanpa mekanisme hapus/deactivate, data demo bisa muncul ke tamu dan menimbulkan kebingungan/masalah di production.",
+    "Bug/regresi di Admin Panel saat generate hotel invite token: muncul sebentar lalu menghilang dan UI jadi loading terus; notifikasi menyatakan token berhasil dibuat tetapi token tidak tampil lagi (indikasi race condition/state invalidate/actor call refetch).",
+    "UI Admin Panel Generate Invite Token tidak stabil: token baru sempat muncul lalu hilang lagi; kadang perlu logout/login agar token terlihat. Indikasi query list token tidak konsisten (refetch/invalidation/race condition) meski backend sukses generate.",
+    "Bug saat akun hotel dummy memilih kelas hotel (bintang 1–5/melati): aksi memilih kelas memunculkan notifikasi error (kemungkinan validasi/state/backend update gagal).",
+    "Bug UI Admin Panel Generate Invite Token: token sering muncul sebentar lalu hilang lagi; kadang baru muncul setelah logout/login. Ini mengindikasikan masalah state/query refresh (list token tidak konsisten meski backend sukses generate).",
+    "Error runtime setelah publish: muncul \"Initialization Warning\" dengan pesan \"Canister ... is stopped\" dan \"Hotel Access Check Failed: Unable to verify hotel access permissions\" sehingga Hotel Area/cek akses hotel gagal dan UI menjadi error/loading. Indikasi backend canister berhenti/tidak running pasca deploy.",
+    "User melaporkan pada versi terbaru masih terjadi: backend canister sempat STOPPED setelah deploy, Admin Panel infinite loading, generate token admin tidak stabil, dan booking/reservasi belum bisa dipakai; user mengirim screenshot sebagai bukti kondisi error tersebut.",
+    "(v24+ / terbaru) Masalah visibilitas hotel: hotel yang sudah diinput/terlihat di sisi Admin (Admin Panel/Hotel list) tidak tampil di sisi tamu (Browse Hotels/guest view). Indikasi kemungkinan terkait flag active/inactive, TEST/DUMMY hide-from-guest, atau query/role-gating di frontend yang tidak memuat hotel aktif untuk guest.",
+    "Masalah visibilitas: hotel terlihat di Admin Panel tetapi tidak muncul di Browse Hotels (guest). Kemungkinan hotel berstatus inactive/hidden/TEST-DUMMY atau aturan query guest memfilter hotel sehingga 0 hotels found tanpa penjelasan.",
+    "(Regresi berulang) Admin Panel, Hotel Area, Guest Account, dan Account Status bisa kembali infinite loading setelah deploy; beberapa data/section sempat muncul beberapa detik lalu hilang (indikasi race condition/auth-role resolution atau actor/backend call tidak stabil).",
+    "(v28 / terbaru) Keluhan user: Admin Panel masih infinite loading pada kondisi tertentu dan hotel aktif belum konsisten muncul di akun tamu; user menilai proses perbaikan berulang (sudah ~28 deploy, ~18 jam) tidak menghasilkan stabilitas dan memakan kredit/waktu.",
+    "(v29 / terbaru) Admin Panel masih infinite loading (tidak bisa dibuka) meskipun sudah deploy berulang; stabilitas akses admin belum terbukti dan user khawatir kredit habis sebelum masalah selesai.",
+    "Scope terbaru dari user: Hotel Area (termasuk tampilan foto/logo) sudah OK; prioritas masalah/fitur yang belum: Akun Tamu, kalender, dashboard analitik, notifikasi email, dan pilihan kamar—dengan syarat tidak boleh mengganggu Panel Admin yang sudah stabil.",
+    "User melaporkan setelah aktivasi booking (v40), tamu masih belum bisa melakukan booking; user menduga penyebabnya karena hotel yang terlihat adalah hotel dummy/test. Perlu investigasi kondisi/aturan yang memblok booking pada hotel test/dummy vs hotel aktif, serta entry point UI booking dari Browse Hotels.",
+    "Booking masih gagal (failed) saat tamu sudah memilih tanggal check-in/check-out namun submit booking error/tidak bisa diproses; perlu fokus perbaikan booking end-to-end.",
+    "Bug tampilan mata uang harga kamar: input harga IDR (mis. 800000) tampil ke tamu sebagai $800000 sehingga berpotensi salah paham; butuh dukungan currency yang benar/fleksibel.",
+    "Alur booking belum menyertakan room type yang dipilih: tamu tidak tahu tipe kamar yang dibooking dan hotel juga tidak tahu pilihan kamar pada booking; UI seleksi kamar/indikator (ceklist) belum memadai untuk multi-room.",
+    "Deployment/build terbaru gagal: muncul status \"Deployment didn't complete\" dengan \"Deployment error\" saat mencoba deploy perubahan terkait perbaikan booking failed + dukungan multi-mata uang harga kamar.",
+    "(v45+ terbaru) Seluruh aplikasi terdampak 'Backend Temporarily Unavailable / Canister ... is stopped (IC0508)': Admin Panel, Hotel Area, Guest Account, Account Status, dan booking semuanya gagal karena backend canister STOPPED setelah deploy."
+  ],
+  "isFixRequest": true,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
+      "description": "Apple touch icon PWA hasil generate/resize",
+      "targetWidth": 180,
+      "targetHeight": 180
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+      "description": "PWA icon 192x192 hasil generate/resize",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+      "description": "PWA icon 512x512 hasil generate/resize",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
+      "description": "PWA maskable icon 512x512 hasil generate/resize",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "frontend/public/assets/generated/sgo-logo.dim_512x512.png",
+      "description": "Logo SGO 512x512 hasil generate/resize",
+      "targetWidth": 512,
+      "targetHeight": 512
+    }
+  ],
+  "projectName": "Sentra Guest OS (SGO)",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

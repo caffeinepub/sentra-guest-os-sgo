@@ -1,0 +1,109 @@
+{
+  "kind": "build_request",
+  "title": "Stabilize app when backend canister is stopped and add backend health verification",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-24",
+      "text": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning a small, stable response (at minimum: a boolean `ok` plus a `timestamp` from `Time.now()`), and ensure it cannot trap for anonymous callers.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Ya, semua kena"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Anonymous callers can invoke the health endpoint successfully (no traps).",
+        "Authenticated callers can invoke the health endpoint successfully.",
+        "The response shape is stable and does not depend on any optional/legacy state."
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "text": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Ya, semua kena"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When the backend canister is stopped (IC0508), the app consistently shows the diagnostics error card instead of partially rendering pages that later fail.",
+        "Actor initialization never remains in a perpetual loading state; it always resolves to ready or error within the configured timeout budget.",
+        "Access-control initialization remains non-blocking (a failure produces only a warning, not a hard failure) when the backend is otherwise healthy."
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "text": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Ya, semua kena"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A grep/code audit shows no route-level/page-level gating uses the blocking actor initialization path.",
+        "On a stopped backend, navigating between Guest Area / Hotel Area / Guest Account / Account Status always results in a consistent diagnostics experience (no blank screen)."
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "text": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Ya, semua kena"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When the raw error contains a canister ID, the UI displays it in a clearly labeled field that users can copy.",
+        "The default view shows a short, user-friendly message; raw technical details remain behind an explicit expand/collapse control.",
+        "All new/modified user-facing text is in English."
+      ]
+    },
+    {
+      "id": "REQ-28",
+      "text": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Ya, semua kena"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/REGRESSION_CHECKLIST.md` includes a dedicated section/checklist for 'Backend stopped (IC0508)' validation.",
+        "Checklist steps are actionable and reference the actual UI entry points (Retry Connection, Hard Refresh, Open Troubleshooting Tools)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Respect single-actor backend architecture: all Motoko logic remains in `backend/main.mo`.",
+    "Do not edit any files under `frontend/src/components/ui` or any frontend paths listed in `frontend.immutablePaths` from SYSTEM_CONTEXT.",
+    "All user-facing text introduced/modified by this build must be in English."
+  ],
+  "nonGoals": [
+    "Do not implement new domain features (currency, room-type selection in bookings, reputation/rating, analytics, notifications) as part of this change.",
+    "Do not change guest-facing visibility/filtering rules for hotels (active + paid + not dummy/test remains the rule).",
+    "Do not add external services, databases, or non-Internet-Identity authentication."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

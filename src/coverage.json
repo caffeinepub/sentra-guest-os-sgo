@@ -1,0 +1,91 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-04T10:46:00.128Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 5,
+    "implemented": 4,
+    "items": [
+      {
+        "id": "REQ-24",
+        "summary": "Add a backend public query endpoint in `backend/main.mo` for an explicit canister liveness check (e.g., `health()`), returning a small, stable response (at minimum: a boolean `ok` plus a `timestamp` from `Time.now()`), and ensure it cannot trap for anonymous callers.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-25",
+        "summary": "Update frontend actor readiness gating to verify backend liveness by calling the new backend health endpoint after actor creation (inside `useActorSafe`) and treat any failure (timeout/rejection/replica error) as a terminal, user-visible connection error via existing diagnostics UI (no infinite loading).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useActorSafe.ts",
+          "frontend/src/components/auth/RequireActorReady.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useActorSafe.ts"
+        ]
+      },
+      {
+        "id": "REQ-26",
+        "summary": "Ensure no app route depends on the legacy blocking actor hook (`frontend/src/hooks/useActor.ts`) for initial page render; migrate any remaining usage in pages/components to `useActorSafe` + `RequireActorReady` so a stopped backend cannot cause cascading failures or blank panels.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useBrowseHotels.ts",
+          "frontend/src/pages/BrowseHotels.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useBrowseHotels.ts"
+        ]
+      },
+      {
+        "id": "REQ-27",
+        "summary": "Improve the stopped-canister diagnostics message (English UI copy) to include: (1) the detected canister ID if present in the error text, (2) a clear statement that the backend is stopped, and (3) actionable next steps for the operator/admin (retry, hard refresh, open troubleshooting), without exposing internal stack traces by default.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/replicaRejection.ts",
+          "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
+          "frontend/src/utils/getErrorMessage.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/replicaRejection.ts",
+          "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-28",
+        "summary": "Add a lightweight regression test plan entry (update `frontend/REGRESSION_CHECKLIST.md`) specifically for the stopped-backend scenario to verify: route access, retry behavior, troubleshooting navigation, and that access-control initialization warnings do not block non-admin user flows when backend is healthy.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/REGRESSION_CHECKLIST.md"
+        ],
+        "matchedFiles": [
+          "frontend/REGRESSION_CHECKLIST.md"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/REGRESSION_CHECKLIST.md",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useActorSafe.ts",
+    "frontend/src/hooks/useBrowseHotels.ts",
+    "frontend/src/utils/replicaRejection.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

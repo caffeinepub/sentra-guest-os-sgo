@@ -1,0 +1,89 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Frontend stabilization for stopped backend canister via health-verified actor readiness and improved diagnostics",
+  "requirements": [
+    {
+      "id": "REQ-25",
+      "summary": "Verify backend liveness during actor initialization (useActorSafe) by calling backend health after actor creation and surface failures as terminal diagnostics errors (no infinite loading).",
+      "acceptanceCriteria": [
+        "When the backend canister is stopped (IC0508), the app consistently shows the diagnostics error card instead of partially rendering pages that later fail.",
+        "Actor initialization never remains in a perpetual loading state; it always resolves to ready or error within the configured timeout budget.",
+        "Access-control initialization remains non-blocking (a failure produces only a warning, not a hard failure) when the backend is otherwise healthy."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useActorSafe.ts",
+          "operation": "modify",
+          "description": "After actor creation, add a bounded liveness verification step by calling the backend health capability with a timeout. If the health call rejects/times out/returns a replica error, treat it as a terminal actor initialization error (throw) so RequireActorReady and other consumers render diagnostics instead of continuing. Keep access-control initialization non-blocking: run it only after health succeeds and continue to convert its failures into a warning string (not a hard failure)."
+        },
+        {
+          "path": "frontend/src/components/auth/RequireActorReady.tsx",
+          "operation": "modify",
+          "description": "Align readiness gating UI with the new health-verified actor initialization by ensuring any actorError from liveness verification renders RouteDiagnosticsErrorCard (no fallback partial render), and keep the access-control warning display non-blocking when actorReady is true."
+        }
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "summary": "Remove route/page-level dependence on legacy blocking actor initialization (useActor) by migrating remaining public/route hooks to useActorSafe so stopped backend yields consistent diagnostics instead of blank/partial panels.",
+      "acceptanceCriteria": [
+        "A grep/code audit shows no route-level/page-level gating uses the blocking actor initialization path.",
+        "On a stopped backend, navigating between Guest Area / Hotel Area / Guest Account / Account Status always results in a consistent diagnostics experience (no blank screen)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useBrowseHotels.ts",
+          "operation": "modify",
+          "description": "Migrate guest-facing browse hooks from useActor (legacy blocking) to useActorSafe so actor creation is health-verified and bounded by timeouts. Ensure the hook surfaces actorError as a query error (or returns a consistent error state) rather than leaving routes stuck in loading when the backend is stopped."
+        },
+        {
+          "path": "frontend/src/pages/BrowseHotels.tsx",
+          "operation": "modify",
+          "description": "Update Browse Hotels route rendering to handle actor/health-related failures coming from the migrated browse hooks by showing RouteDiagnosticsErrorCard consistently (matching other routes) and ensuring no blank/partial UI is rendered when the backend is stopped."
+        }
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "summary": "Improve stopped-canister diagnostics copy to include canister ID extraction (when present), a clear 'backend is stopped' message, and actionable next steps while hiding raw technical details behind an explicit toggle by default.",
+      "acceptanceCriteria": [
+        "When the raw error contains a canister ID, the UI displays it in a clearly labeled field that users can copy.",
+        "The default view shows a short, user-friendly message; raw technical details remain behind an explicit expand/collapse control.",
+        "All new/modified user-facing text is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/replicaRejection.ts",
+          "operation": "modify",
+          "description": "Extend replica rejection analysis to extract a canister ID from common stopped-canister (IC0508) error strings and return it as structured metadata alongside the existing flags and userMessage."
+        },
+        {
+          "path": "frontend/src/components/diagnostics/RouteDiagnosticsErrorCard.tsx",
+          "operation": "modify",
+          "description": "Update the stopped-backend diagnostics UI to (1) show a clear statement that the backend is stopped, (2) display the detected canister ID when available in a labeled, copyable field, and (3) present actionable operator/admin next steps (Retry Connection, Hard Refresh Page, Open Troubleshooting Tools). Keep raw technical details behind the existing expand/collapse control and avoid showing internal stack traces by default."
+        },
+        {
+          "path": "frontend/src/utils/getErrorMessage.ts",
+          "operation": "modify",
+          "description": "Ensure any newly introduced stopped-canister messaging and fallback connection messaging remains concise, user-friendly, and in English, deferring raw/technical error strings to the diagnostics expand/collapse UI."
+        }
+      ]
+    },
+    {
+      "id": "REQ-28",
+      "summary": "Add a dedicated regression checklist entry for 'Backend stopped (IC0508)' covering route access, retry behavior, troubleshooting navigation, and non-blocking access-control warnings when backend is healthy.",
+      "acceptanceCriteria": [
+        "`frontend/REGRESSION_CHECKLIST.md` includes a dedicated section/checklist for 'Backend stopped (IC0508)' validation.",
+        "Checklist steps are actionable and reference the actual UI entry points (Retry Connection, Hard Refresh, Open Troubleshooting Tools)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/REGRESSION_CHECKLIST.md",
+          "operation": "modify",
+          "description": "Add/expand a dedicated 'Backend stopped (IC0508)' section with actionable steps that explicitly verify: navigation across Guest Area / Hotel Area / Guest Account / Account Status results in diagnostics (no blank screen), Retry Connection recovers after restart, Hard Refresh behavior, and Open Troubleshooting Tools navigation. Include an explicit check that access-control initialization failures appear only as a warning (not a blocking failure) when backend health succeeds."
+        }
+      ]
+    }
+  ]
+}

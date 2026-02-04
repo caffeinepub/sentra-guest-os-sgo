@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        
+        /* Warm hospitality palette - light mode */
+        --background: 0.98 0.01 60;
+        --foreground: 0.25 0.02 60;
+        --card: 1 0 0;
+        --card-foreground: 0.25 0.02 60;
+        --popover: 1 0 0;
+        --popover-foreground: 0.25 0.02 60;
+        
+        /* Warm teal primary (hospitality-friendly, not blue/purple) */
+        --primary: 0.55 0.12 180;
+        --primary-foreground: 0.98 0.01 180;
+        
+        /* Warm secondary */
+        --secondary: 0.92 0.02 60;
+        --secondary-foreground: 0.25 0.02 60;
+        
+        --muted: 0.95 0.01 60;
+        --muted-foreground: 0.50 0.02 60;
+        --accent: 0.90 0.03 45;
+        --accent-foreground: 0.25 0.02 45;
+        
+        --destructive: 0.55 0.20 25;
+        --destructive-foreground: 0.98 0 0;
+        
+        --border: 0.88 0.01 60;
+        --input: 0.88 0.01 60;
+        --ring: 0.55 0.12 180;
+        
+        --chart-1: 0.60 0.15 180;
+        --chart-2: 0.65 0.12 150;
+        --chart-3: 0.70 0.10 200;
+        --chart-4: 0.55 0.18 45;
+        --chart-5: 0.60 0.14 30;
+    }
+
+    .dark {
+        /* Dark mode - warm hospitality theme */
+        --background: 0.18 0.02 60;
+        --foreground: 0.95 0.01 60;
+        --card: 0.22 0.02 60;
+        --card-foreground: 0.95 0.01 60;
+        --popover: 0.20 0.02 60;
+        --popover-foreground: 0.95 0.01 60;
+        
+        /* Lighter teal for dark mode */
+        --primary: 0.65 0.14 180;
+        --primary-foreground: 0.18 0.02 180;
+        
+        --secondary: 0.28 0.02 60;
+        --secondary-foreground: 0.95 0.01 60;
+        
+        --muted: 0.28 0.02 60;
+        --muted-foreground: 0.65 0.02 60;
+        --accent: 0.35 0.03 45;
+        --accent-foreground: 0.95 0.01 45;
+        
+        --destructive: 0.60 0.22 25;
+        --destructive-foreground: 0.18 0.02 25;
+        
+        --border: 0.30 0.02 60;
+        --input: 0.30 0.02 60;
+        --ring: 0.65 0.14 180;
+        
+        --chart-1: 0.65 0.16 180;
+        --chart-2: 0.70 0.14 150;
+        --chart-3: 0.75 0.12 200;
+        --chart-4: 0.60 0.20 45;
+        --chart-5: 0.65 0.16 30;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+        /* Prevent horizontal overflow on mobile */
+        overflow-x: hidden;
+        /* iOS text size adjust */
+        -webkit-text-size-adjust: 100%;
+    }
+    
+    /* Prevent horizontal overflow globally */
+    html {
+        overflow-x: hidden;
+    }
+    
+    /* Safe area insets for iOS notch/home indicator */
+    @supports (padding: max(0px)) {
+        body {
+            padding-left: max(0px, env(safe-area-inset-left));
+            padding-right: max(0px, env(safe-area-inset-right));
+        }
+    }
+}
+
+@layer base {
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-semibold tracking-tight;
+    }
+    
+    h1 {
+        @apply text-3xl sm:text-4xl;
+    }
+    
+    h2 {
+        @apply text-2xl sm:text-3xl;
+    }
+    
+    h3 {
+        @apply text-xl sm:text-2xl;
+    }
+    
+    /* Ensure images don't overflow */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Better word breaking for long text */
+    p, span, div {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* iOS-specific fixes */
+@supports (-webkit-touch-callout: none) {
+    /* Fix iOS Safari input zoom */
+    input, select, textarea {
+        font-size: 16px;
+    }
+    
+    /* Prevent iOS Safari bounce scroll */
+    body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    #root {
+        overflow-y: auto;
+        height: 100vh;
+        -webkit-overflow-scrolling: touch;
+    }
+}
