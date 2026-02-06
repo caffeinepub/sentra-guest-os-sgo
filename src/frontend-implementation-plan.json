@@ -1,248 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Bookings room selection, availability calendar, payment instructions sharing, currency formatting, and bilingual UI (frontend-only)",
+  "title": "Add publishing/deployment guidance and post-deploy verification UI on Account Status",
   "requirements": [
     {
-      "id": "REQ-24",
-      "summary": "Require guests to select a room type during booking, and display the selected room type in guest and hotel booking lists.",
+      "id": "REQ-1",
+      "summary": "Add a “Publishing & Deployment” help section on the Account Status page with deploy-failure retry instructions and post-deploy cache troubleshooting guidance, including a direct link to the Troubleshooting tools.",
       "acceptanceCriteria": [
-        "When a guest opens the booking request dialog, the form includes a required 'Room type' selection populated from the hotel's room inventory.",
-        "Booking submission is blocked with a clear inline validation message if no room type is selected.",
-        "Guest booking list cards display the selected room type.",
-        "Hotel booking list cards display the selected room type."
+        "Account Status page includes a clearly titled “Publishing & Deployment” section with step-by-step guidance written in English.",
+        "The guidance explicitly covers: (1) how to publish/deploy, (2) what to do when deploy fails (retry/rerun deployment), and (3) what to do when the deploy succeeds but UI doesn’t update (hard refresh + cache/service worker actions).",
+        "The section contains a direct link/button that scrolls/navigates to the existing Troubleshooting tools on the same page (or opens them via the existing #troubleshooting anchor)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/bookings/BookingRequestDialog.tsx",
-          "operation": "modify",
-          "description": "Add a required 'Room type' selection (populated from the hotel's room inventory passed from Browse Hotels) and include the selected room_type in the create booking call. Use shadcn-ui Select components to implement the selection UI; verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
+          "operation": "create",
+          "description": "Create a new Account Status help card/section titled “Publishing & Deployment” with English step-by-step guidance covering: how to publish/deploy, explicit instruction to rerun deployment if it fails, and a checklist for when changes aren’t visible after a successful deploy (hard refresh, reset app cache, disable offline cache/service worker). Include a Button/Link that navigates to the existing #troubleshooting anchor on the Account Status page. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/BrowseHotels.tsx",
+          "path": "frontend/src/pages/AccountStatusPage.tsx",
           "operation": "modify",
-          "description": "Pass the hotel's room inventory into BookingRequestDialog so the dialog can populate the required 'Room type' selection. Ensure the booking dialog wiring remains intact. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/bookings/GuestBookingsSection.tsx",
-          "operation": "modify",
-          "description": "Render the booking.room_type field on guest booking cards with a clear label so guests can see the selected room type. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/bookings/HotelBookingsSection.tsx",
-          "operation": "modify",
-          "description": "Render the booking.room_type field on hotel booking cards so hotels can see the selected room type for each request. Verify the component's usage instructions before implementing."
+          "description": "Wire the new PublishingDeploymentHelpSection into the Account Status page layout so it is easy to find (near the top, alongside other status/help content). Ensure TroubleshootingSection is accessible on the same page for users who can see the help section (so the #troubleshooting link works), while keeping other admin-only tools gated as appropriate."
         }
       ]
     },
     {
-      "id": "REQ-25",
-      "summary": "Add a Hotel Area calendar/availability view and make guest booking date selection availability-aware using booked ranges (with safe fallback if the backend capability is unavailable).",
+      "id": "REQ-2",
+      "summary": "Extend the Pre-Publish Gate UI with a “Post-deploy verification” subsection containing 3–5 verification checkboxes and a link to Troubleshooting for stale-asset/cache issues.",
       "acceptanceCriteria": [
-        "Hotel Area includes a new 'Calendar' (or 'Availability') section/tab showing bookings on a calendar timeline (at minimum by date range, and filterable by room type if room types exist).",
-        "Guest booking date pickers prevent selecting invalid ranges when dates are already booked for the chosen room type (or clearly warn and block submission if conflicts exist).",
-        "Calendar and availability checks do not break existing booking creation and confirmation flows."
+        "Pre-Publish Gate shows a dedicated post-deploy verification subsection with checkboxes.",
+        "Copy is in English and explicitly mentions using Troubleshooting actions if the new build appears not to be live due to caching.",
+        "There is a link/button from the Pre-Publish Gate area to the Troubleshooting section (or the Account Status troubleshooting anchor)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/HotelArea.tsx",
+          "path": "frontend/src/components/account/PrePublishGateCard.tsx",
           "operation": "modify",
-          "description": "Add a new Tabs section for 'Calendar'/'Availability' in Hotel Area and wire it to render the new HotelAvailabilityCalendar component. Use existing shadcn-ui Tabs composition; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/bookings/HotelAvailabilityCalendar.tsx",
-          "operation": "create",
-          "description": "Create a Hotel Area availability view that visualizes bookings over time (at minimum as a date-range timeline/list grouped by day/week) and supports filtering by room type when room types exist. Compose existing shadcn-ui building blocks (Card, Select, etc.); verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useAvailability.ts",
-          "operation": "create",
-          "description": "Add React Query hooks to fetch booked date ranges for a hotel (and optionally room type) for a time window. Implement a safe, conditional call strategy that gracefully falls back if the backend function is missing or rejects (e.g., feature unavailable state), without breaking booking flows."
-        },
-        {
-          "path": "frontend/src/components/bookings/BookingDatePickerField.tsx",
-          "operation": "modify",
-          "description": "Extend the date picker field API to accept an additional disabledDate predicate (or booked ranges) so specific dates can be disabled beyond minDate. Keep the component composed from the existing shadcn-ui Calendar/Popover; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/bookings/BookingRequestDialog.tsx",
-          "operation": "modify",
-          "description": "Integrate availability-aware date selection: after room type selection, load booked ranges for the hotel/room type, disable conflicting dates in the check-in/check-out pickers, and add submit-time conflict validation with a clear inline error + blocked submission when conflicts exist. Ensure a safe fallback (availability not available) that does not break submission. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "summary": "Fix Hotel Area booking history visibility and add a status filter with a default view that includes confirmed bookings.",
-      "acceptanceCriteria": [
-        "After a hotel confirms a booking, the booking remains visible in Hotel Area without requiring logout/login.",
-        "Hotel Area booking list supports filtering by status (Pending, Confirmed, Rejected, Cancelled) and/or a combined 'All' view.",
-        "The default Hotel Area booking view is not limited to only pending bookings."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useBookings.ts",
-          "operation": "modify",
-          "description": "Change the hotel bookings query to load the full hotel booking list (not only pending) and align query keys/invalidations so confirm/reject mutations refresh the same list and confirmed bookings remain visible immediately."
-        },
-        {
-          "path": "frontend/src/components/bookings/HotelBookingsSection.tsx",
-          "operation": "modify",
-          "description": "Add a status filter UI (All/Pending/Confirmed/Rejected/Cancelled), default to 'All' or a view that includes confirmed bookings, and ensure the empty-state messaging matches the selected filter. Compose with shadcn-ui Select/Badge components; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HotelArea.tsx",
-          "operation": "modify",
-          "description": "Remove any remaining assumptions that the bookings tab only shows pending bookings and ensure the tab renders consistently with the updated hotel bookings hook and filter behavior. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-27",
-      "summary": "Allow hotels to configure manual payment instructions and show them to guests after booking submission (with fallback when not configured).",
-      "acceptanceCriteria": [
-        "Hotel Area provides a form to save and update the hotel's manual payment instructions (multiple methods supported, free-text notes supported).",
-        "After a guest submits a booking, the payment instructions shown to the guest include the specific hotel's saved payment instructions (not only the global email).",
-        "If a hotel has not configured payment instructions, the guest sees a clear fallback message and the existing email-based flow still works."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/payments/HotelManualPaymentInstructionsForm.tsx",
-          "operation": "create",
-          "description": "Create a Hotel Area form that edits and saves the hotel's manual payment instructions (free-text, supports multiple methods in the text). Persist by updating and saving the existing hotel profile (payment_instructions field) via existing hooks. Compose shadcn-ui Card/Input/Textarea/Button; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HotelArea.tsx",
-          "operation": "modify",
-          "description": "Wire the new HotelManualPaymentInstructionsForm into an appropriate Hotel Area tab/section (e.g., Profile or Subscription) without introducing new top-level routes. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
-          "operation": "modify",
-          "description": "Fetch and render the specific hotel's saved payment instructions (from hotel profile payment_instructions) in the guest-facing payment instructions view after booking submission. Keep the existing email flow as fallback and show a clear message when hotel instructions are not configured. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/bookings/BookingRequestDialog.tsx",
-          "operation": "modify",
-          "description": "Pass hotelPrincipal into BookingPaymentInstructions (or otherwise provide access to the hotel's profile) so the instructions can be hotel-specific. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "summary": "Support per-room currency selection (IDR and USD minimum) and display prices with correct currency formatting across room and booking UIs.",
-      "acceptanceCriteria": [
-        "Hotel Rooms Manager allows selecting the currency when creating/editing a room and validates that a currency is set.",
-        "Guest room browsing displays prices using correct currency formatting (e.g., IDR uses 'Rp' formatting; USD uses '$' formatting).",
-        "No UI path displays IDR amounts with a '$' prefix."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/formatCurrency.ts",
-          "operation": "create",
-          "description": "Add a shared currency formatting utility that formats RoomCurrency + amount consistently (IDR -> Rp formatting; USD -> $ formatting; other currencies handled safely)."
-        },
-        {
-          "path": "frontend/src/components/hotel/HotelRoomsManager.tsx",
-          "operation": "modify",
-          "description": "Add a required currency field to the room create/edit dialog (minimum options: IDR and USD) and include it when saving a room. Update room cards to display formatted prices using the shared formatter instead of a hard-coded '$'. Compose with shadcn-ui Select; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/hotel/GuestHotelRoomsDialog.tsx",
-          "operation": "modify",
-          "description": "Display room prices using the shared currency formatter based on the room.currency field (remove hard-coded '$'). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/BrowseHotels.tsx",
-          "operation": "modify",
-          "description": "Ensure any room/price references shown on the browse flow remain currency-correct (even if only indirectly via dialogs), and avoid any hard-coded '$' prefix for room prices. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "summary": "Add bilingual UI (Indonesian/English) with a persistent language switcher and translate key screens/components including all new text from this build.",
-      "acceptanceCriteria": [
-        "A language switcher is available in the UI and persists the selected language across reloads.",
-        "Key screens are translated: Guest Area, Browse Hotels, Guest Account, Hotel Area (including bookings/rooms/subscription/payment sections), and booking dialogs/instructions.",
-        "All new/changed user-facing text added in this build is written in English and is also available in Indonesian via the i18n system.",
-        "Language switching does not require re-authentication and does not break routing or actor readiness gating."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/i18n/i18n.ts",
-          "operation": "create",
-          "description": "Implement a lightweight i18n system (EN/ID dictionaries, key-based translation, and type-safe helpers where feasible) with localStorage persistence for the selected language."
-        },
-        {
-          "path": "frontend/src/i18n/I18nProvider.tsx",
-          "operation": "create",
-          "description": "Add an I18nProvider + hook to access current language and translation function across the app, persisting language selection across reloads."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wrap the app with the I18nProvider so translations and language switching are available across all routes without affecting auth/actor readiness gating."
-        },
-        {
-          "path": "frontend/src/components/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Add a language switcher control in the header (desktop + mobile menu), and replace header navigation labels with i18n keys. Compose existing shadcn-ui Button/Sheet components; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/GuestArea.tsx",
-          "operation": "modify",
-          "description": "Translate all visible copy using the i18n system and ensure English + Indonesian variants exist for all hero/CTA text modified by this build."
-        },
-        {
-          "path": "frontend/src/pages/BrowseHotels.tsx",
-          "operation": "modify",
-          "description": "Translate Browse Hotels UI text (filters, empty states, warnings, CTAs) and ensure any new room-type / availability related strings introduced by this build are translated."
-        },
-        {
-          "path": "frontend/src/pages/GuestAccountPage.tsx",
-          "operation": "modify",
-          "description": "Translate Guest Account page headings/descriptions and ensure booking/stay sections remain functional under language switching."
-        },
-        {
-          "path": "frontend/src/pages/HotelArea.tsx",
-          "operation": "modify",
-          "description": "Translate Hotel Area headings, tab labels (including the new Calendar/Availability tab), and subscription/payment copy without breaking routing or actor readiness gating."
-        },
-        {
-          "path": "frontend/src/components/bookings/BookingRequestDialog.tsx",
-          "operation": "modify",
-          "description": "Translate booking dialog UI strings including the new required room type validation, availability/conflict messages, and submission states."
-        },
-        {
-          "path": "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
-          "operation": "modify",
-          "description": "Translate guest payment instruction copy including the new hotel-specific instructions fallback messaging."
-        },
-        {
-          "path": "frontend/src/components/bookings/GuestBookingsSection.tsx",
-          "operation": "modify",
-          "description": "Translate guest booking history UI strings (labels, empty states, refresh/cancel prompts) and include translation for the new room type label."
-        },
-        {
-          "path": "frontend/src/components/bookings/HotelBookingsSection.tsx",
-          "operation": "modify",
-          "description": "Translate hotel booking management strings including the new status filter labels and any room type labels."
-        },
-        {
-          "path": "frontend/src/components/hotel/HotelRoomsManager.tsx",
-          "operation": "modify",
-          "description": "Translate rooms manager UI strings including the new currency selection and formatted price display labels."
-        },
-        {
-          "path": "frontend/src/components/hotel/GuestHotelRoomsDialog.tsx",
-          "operation": "modify",
-          "description": "Translate guest rooms dialog UI strings and ensure currency-formatted prices remain correct in both languages."
-        },
-        {
-          "path": "frontend/src/components/AppFooter.tsx",
-          "operation": "modify",
-          "description": "Translate footer text where appropriate (keeping the email address unchanged) and ensure the footer remains stable under language switching."
+          "description": "Add a new “Post-deploy verification” subsection to the existing Pre-Publish Gate card with 3–5 checkboxes focused on confirming the new version is live (e.g., confirm a visible version/footer change, reload without stale cache, confirm key routes load). Include English copy noting that if verification fails due to stale assets, the user should use the Troubleshooting tools to clear caches and then retry verification. Add a Button/Link to the Account Status page’s #troubleshooting anchor. Verify the component's usage instructions before implementing."
         }
       ]
     }

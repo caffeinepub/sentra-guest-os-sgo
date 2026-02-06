@@ -1,5 +1,5 @@
 import { useGetHotelProfile } from '../hooks/useHotelProfile';
-import { useIsCallerInvited } from '../hooks/useHotelInvites';
+import { useHotelAccess } from '../hooks/useHotelAccess';
 import { useSubscriptionStatus } from '../hooks/usePaymentRequest';
 import { useGetHotelBookings } from '../hooks/useBookings';
 import { useActorSafe } from '../hooks/useActorSafe';
@@ -19,13 +19,13 @@ import { SiWhatsapp } from 'react-icons/si';
 
 function HotelAreaContent() {
   const { actorReady, actorError, actorLoading, retry: retryActor } = useActorSafe();
-  const { data: isInvited, isLoading: inviteLoading, isError: inviteError, error: inviteErrorObj, refetch: refetchInvite } = useIsCallerInvited();
+  const { canAccessHotelArea, isLoading: accessLoading, hasError: accessError } = useHotelAccess();
   const { data: profile, isLoading: profileLoading } = useGetHotelProfile();
   const { data: subscriptionStatus, isLoading: subscriptionLoading } = useSubscriptionStatus();
   const { data: bookings, isLoading: bookingsLoading, isError: bookingsError, error: bookingsErrorObj, refetch: refetchBookings } = useGetHotelBookings();
 
   // Show loading only during initial load
-  if (actorLoading || inviteLoading) {
+  if (actorLoading || accessLoading) {
     return (
       <div className="container py-12">
         <div className="flex items-center justify-center py-24">
@@ -35,13 +35,11 @@ function HotelAreaContent() {
     );
   }
 
-  // Show consolidated diagnostics error if actor failed or invite check failed
-  if (!actorReady || inviteError) {
+  // Show consolidated diagnostics error if actor failed or access check failed
+  if (!actorReady || accessError) {
     const errorMessage = actorError 
       ? (actorError instanceof Error ? actorError.message : 'Actor initialization failed')
-      : inviteError 
-        ? (inviteErrorObj instanceof Error ? inviteErrorObj.message : 'Failed to verify invite status')
-        : 'Unknown error';
+      : 'Failed to verify hotel access permissions';
 
     return (
       <RouteDiagnosticsErrorCard
@@ -52,16 +50,13 @@ function HotelAreaContent() {
           if (actorError) {
             await retryActor();
           }
-          if (inviteError) {
-            await refetchInvite();
-          }
         }}
       />
     );
   }
 
   // Invite gate
-  if (!isInvited) {
+  if (!canAccessHotelArea) {
     return <HotelInviteGate />;
   }
 

@@ -6,32 +6,32 @@
     :root {
         --radius: 0.5rem;
         
-        /* Warm hospitality palette - light mode */
-        --background: 0.98 0.01 60;
-        --foreground: 0.25 0.02 60;
+        /* Clean white/light palette */
+        --background: 1 0 0;
+        --foreground: 0.20 0.01 240;
         --card: 1 0 0;
-        --card-foreground: 0.25 0.02 60;
+        --card-foreground: 0.20 0.01 240;
         --popover: 1 0 0;
-        --popover-foreground: 0.25 0.02 60;
+        --popover-foreground: 0.20 0.01 240;
         
-        /* Warm teal primary (hospitality-friendly, not blue/purple) */
+        /* Teal primary (hospitality-friendly) */
         --primary: 0.55 0.12 180;
-        --primary-foreground: 0.98 0.01 180;
+        --primary-foreground: 1 0 0;
         
-        /* Warm secondary */
-        --secondary: 0.92 0.02 60;
-        --secondary-foreground: 0.25 0.02 60;
+        /* Light secondary */
+        --secondary: 0.96 0.01 240;
+        --secondary-foreground: 0.20 0.01 240;
         
-        --muted: 0.95 0.01 60;
-        --muted-foreground: 0.50 0.02 60;
-        --accent: 0.90 0.03 45;
-        --accent-foreground: 0.25 0.02 45;
+        --muted: 0.96 0.01 240;
+        --muted-foreground: 0.50 0.01 240;
+        --accent: 0.94 0.02 200;
+        --accent-foreground: 0.20 0.01 240;
         
         --destructive: 0.55 0.20 25;
-        --destructive-foreground: 0.98 0 0;
+        --destructive-foreground: 1 0 0;
         
-        --border: 0.88 0.01 60;
-        --input: 0.88 0.01 60;
+        --border: 0.90 0.01 240;
+        --input: 0.90 0.01 240;
         --ring: 0.55 0.12 180;
         
         --chart-1: 0.60 0.15 180;
@@ -42,38 +42,37 @@
     }
 
     .dark {
-        /* Dark mode - warm hospitality theme */
-        --background: 0.18 0.02 60;
-        --foreground: 0.95 0.01 60;
-        --card: 0.22 0.02 60;
-        --card-foreground: 0.95 0.01 60;
-        --popover: 0.20 0.02 60;
-        --popover-foreground: 0.95 0.01 60;
+        /* Dark mode disabled - force light theme */
+        --background: 1 0 0;
+        --foreground: 0.20 0.01 240;
+        --card: 1 0 0;
+        --card-foreground: 0.20 0.01 240;
+        --popover: 1 0 0;
+        --popover-foreground: 0.20 0.01 240;
         
-        /* Lighter teal for dark mode */
-        --primary: 0.65 0.14 180;
-        --primary-foreground: 0.18 0.02 180;
+        --primary: 0.55 0.12 180;
+        --primary-foreground: 1 0 0;
         
-        --secondary: 0.28 0.02 60;
-        --secondary-foreground: 0.95 0.01 60;
+        --secondary: 0.96 0.01 240;
+        --secondary-foreground: 0.20 0.01 240;
         
-        --muted: 0.28 0.02 60;
-        --muted-foreground: 0.65 0.02 60;
-        --accent: 0.35 0.03 45;
-        --accent-foreground: 0.95 0.01 45;
+        --muted: 0.96 0.01 240;
+        --muted-foreground: 0.50 0.01 240;
+        --accent: 0.94 0.02 200;
+        --accent-foreground: 0.20 0.01 240;
         
-        --destructive: 0.60 0.22 25;
-        --destructive-foreground: 0.18 0.02 25;
+        --destructive: 0.55 0.20 25;
+        --destructive-foreground: 1 0 0;
         
-        --border: 0.30 0.02 60;
-        --input: 0.30 0.02 60;
-        --ring: 0.65 0.14 180;
+        --border: 0.90 0.01 240;
+        --input: 0.90 0.01 240;
+        --ring: 0.55 0.12 180;
         
-        --chart-1: 0.65 0.16 180;
-        --chart-2: 0.70 0.14 150;
-        --chart-3: 0.75 0.12 200;
-        --chart-4: 0.60 0.20 45;
-        --chart-5: 0.65 0.16 30;
+        --chart-1: 0.60 0.15 180;
+        --chart-2: 0.65 0.12 150;
+        --chart-3: 0.70 0.10 200;
+        --chart-4: 0.55 0.18 45;
+        --chart-5: 0.60 0.14 30;
     }
 
     * {

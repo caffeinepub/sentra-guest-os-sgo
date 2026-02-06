@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useHotelAccess } from '../hooks/useHotelAccess';
 import { useI18n } from '../i18n/I18nProvider';
 import PrincipalIdPanel from '../components/profile/PrincipalIdPanel';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ export default function GuestArea() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
+  const { showHotelAreaCTA, isResolved } = useHotelAccess();
 
   const isAuthenticated = !!identity;
 
@@ -53,6 +55,17 @@ export default function GuestArea() {
                     <BarChart3 className="h-5 w-5" />
                     {t('guestArea.accountStatus')}
                   </Button>
+                  {isResolved && showHotelAreaCTA && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      onClick={() => navigate({ to: '/hotel' })}
+                      className="gap-2"
+                    >
+                      <Building2 className="h-5 w-5" />
+                      {t('hotel.hotelArea')}
+                    </Button>
+                  )}
                 </>
               )}
             </div>

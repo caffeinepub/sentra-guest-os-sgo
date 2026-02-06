@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useIsAdmin } from '../hooks/useCurrentUser';
+import { useHotelAccess } from '../hooks/useHotelAccess';
 import { useI18n } from '../i18n/I18nProvider';
 import LoginButton from './auth/LoginButton';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Menu, User, Shield, AlertCircle, RefreshCw, Languages } from 'lucide-react';
+import { Menu, User, Shield, AlertCircle, RefreshCw, Languages, Building2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AppHeader() {
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
   const { data: isAdmin, isLoading: adminLoading, isFailed: adminFailed, refetch: refetchAdmin } = useIsAdmin();
+  const { showHotelAreaCTA, isResolved } = useHotelAccess();
   const { language, setLanguage, t } = useI18n();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -59,6 +61,12 @@ export default function AppHeader() {
                 <Button variant="ghost" onClick={() => handleNavigation('/account-status')}>
                   {t('header.accountStatus')}
                 </Button>
+                {isResolved && showHotelAreaCTA && (
+                  <Button variant="ghost" onClick={() => handleNavigation('/hotel')} className="gap-2">
+                    <Building2 className="h-4 w-4" />
+                    {t('hotel.hotelArea')}
+                  </Button>
+                )}
               </>
             )}
             {isAdmin && !adminLoading && (
@@ -113,6 +121,12 @@ export default function AppHeader() {
                     <Button variant="ghost" className="justify-start" onClick={() => handleNavigation('/account-status')}>
                       {t('header.accountStatus')}
                     </Button>
+                    {isResolved && showHotelAreaCTA && (
+                      <Button variant="ghost" className="justify-start gap-2" onClick={() => handleNavigation('/hotel')}>
+                        <Building2 className="h-4 w-4" />
+                        {t('hotel.hotelArea')}
+                      </Button>
+                    )}
                   </>
                 )}
                 {isAdmin && !adminLoading && (

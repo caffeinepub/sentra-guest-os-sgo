@@ -10,10 +10,10 @@ import Time "mo:core/Time";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import InviteLinksModule "invite-links/invite-links-module";
-import Migration "migration";
+
 import List "mo:core/List";
 
-(with migration = Migration.run)
+
 actor {
   public type UserProfile = {
     name : Text;

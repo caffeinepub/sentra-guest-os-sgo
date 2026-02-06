@@ -2,11 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-required-room-type-selection-to-the-guest-booking-flow-so-a-guest-cannot-submit-a-booking-without-choosing-a-room-type-and-the-chosen-room-type-is-stored-and-displayed-in-both-guest-account-booking-history-and-hotel-area-booking-management",
-      "featureTitle": "Add required room-type selection to the guest booking flow so a guest cannot submit a booking without choosing a room type, and the chosen room type is stored and displayed in both Guest Account booking history and Hotel Area booking management.",
+      "featureId": "feature-add-an-in-app-publishing-deployment-help-section-that-explains-in-english-how-to-publish-the-app-and-what-to-do-if-a-deploy-build-fails-including-a-clear-instruction-that-if-deployment-fails-the-user-should-rerun-deployment-and-a-checklist-for-what-to-try-when-changes-are-not-visible-after-a-successful-deploy-hard-refresh-reset-app-cache-disable-offline-cache-service-worker-place-this-section-on-the-account-status-page-so-it-is-easy-to-find",
+      "featureTitle": "Add an in-app “Publishing & Deployment” help section that explains (in English) how to publish the app and what to do if a deploy/build fails, including a clear instruction that if deployment fails the user should rerun deployment, and a checklist for what to try when changes are not visible after a successful deploy (hard refresh, reset app cache, disable offline cache/service worker). Place this section on the Account Status page so it is easy to find.",
       "files": [
-        "frontend/src/components/bookings/BookingRequestDialog.tsx",
-        "frontend/src/pages/BrowseHotels.tsx"
+        "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
+        "frontend/src/pages/AccountStatusPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,15 +18,15 @@
         "invite-links@3.0.0"
       ],
       "testIds": [
-        "REQ-24"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-a-calendar-feature-for-booking-reservation-needs-provide-1-a-hotel-area-calendar-view-that-shows-booking-occupancy-over-time-and-2-an-availability-aware-date-selection-experience-in-the-guest-booking-dialog-using-backend-provided-booked-ranges",
-      "featureTitle": "Implement a calendar feature for booking/reservation needs: provide (1) a Hotel Area calendar view that shows booking occupancy over time and (2) an availability-aware date selection experience in the guest booking dialog using backend-provided booked ranges.",
+      "featureId": "feature-extend-the-existing-pre-publish-gate-ui-to-include-a-small-post-deploy-verification-subsection-english-with-3-5-checkboxes-focused-on-confirming-the-new-version-is-actually-live-e-g-verify-footer-version-visible-change-reload-without-stale-cache-confirm-key-routes-load-include-a-short-note-that-if-verification-fails-due-to-stale-assets-use-the-troubleshooting-tools-to-clear-caches-and-then-retry-verification",
+      "featureTitle": "Extend the existing Pre-Publish Gate UI to include a small “Post-deploy verification” subsection (English) with 3–5 checkboxes focused on confirming the new version is actually live (e.g., verify footer/version-visible change, reload without stale cache, confirm key routes load). Include a short note that if verification fails due to stale assets, use the Troubleshooting tools to clear caches and then retry verification.",
       "files": [
-        "frontend/src/components/bookings/BookingRequestDialog.tsx"
+        "frontend/src/components/account/PrePublishGateCard.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -38,79 +38,7 @@
         "invite-links@3.0.0"
       ],
       "testIds": [
-        "REQ-25"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-hotel-configurable-manual-payment-methods-in-hotel-area-that-can-be-shared-to-guests-allow-each-hotel-to-save-payment-instructions-e-g-paypal-email-gopay-dana-number-whatsapp-contact-text-and-render-the-saved-instructions-inside-the-guest-facing-booking-payment-instructions-after-booking-submission",
-      "featureTitle": "Add hotel-configurable manual payment methods in Hotel Area that can be shared to guests: allow each hotel to save payment instructions (e.g., PayPal email, GoPay/DANA number, WhatsApp/contact text), and render the saved instructions inside the guest-facing Booking Payment Instructions after booking submission.",
-      "files": [
-        "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
-        "frontend/src/components/bookings/BookingRequestDialog.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-27"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-currency-selection-support-minimum-idr-and-usd-for-room-pricing-so-room-prices-are-not-always-displayed-with-a-prefix-store-currency-per-room-in-the-backend-model-and-format-prices-correctly-across-all-room-and-booking-ui-surfaces",
-      "featureTitle": "Add currency selection support (minimum IDR and USD) for room pricing so room prices are not always displayed with a '$' prefix; store currency per room in the backend model and format prices correctly across all room and booking UI surfaces.",
-      "files": [
-        "frontend/src/components/hotel/HotelRoomsManager.tsx",
-        "frontend/src/pages/BrowseHotels.tsx",
-        "frontend/src/utils/formatCurrency.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-28"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-bilingual-ui-indonesian-and-english-with-a-language-switcher-and-translate-all-current-user-facing-screens-and-key-components-while-ensuring-english-copy-exists-for-all-user-visible-text-introduced-or-modified-by-this-build",
-      "featureTitle": "Add bilingual UI (Indonesian and English) with a language switcher and translate all current user-facing screens and key components, while ensuring English copy exists for all user-visible text introduced or modified by this build.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AppFooter.tsx",
-        "frontend/src/components/AppHeader.tsx",
-        "frontend/src/components/bookings/BookingPaymentInstructions.tsx",
-        "frontend/src/components/bookings/BookingRequestDialog.tsx",
-        "frontend/src/components/hotel/HotelRoomsManager.tsx",
-        "frontend/src/i18n/I18nProvider.tsx",
-        "frontend/src/i18n/i18n.ts",
-        "frontend/src/pages/BrowseHotels.tsx",
-        "frontend/src/pages/GuestArea.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-29"
+        "REQ-2"
       ],
       "confidence": "high"
     }

@@ -4,6 +4,7 @@ import AccountStatusPanel from '../components/account/AccountStatusPanel';
 import AdminRecoveryReveal from '../components/account/AdminRecoveryReveal';
 import TroubleshootingSection from '../components/account/TroubleshootingSection';
 import PrePublishGateCard from '../components/account/PrePublishGateCard';
+import PublishingDeploymentHelpSection from '../components/account/PublishingDeploymentHelpSection';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,10 @@ function AccountStatusContent() {
 
         {/* Account Status Panel - Always visible */}
         <AccountStatusPanel />
+
+        {/* Publishing & Deployment Help - Always visible for authenticated users */}
+        <Separator />
+        <PublishingDeploymentHelpSection />
 
         {/* Admin-only sections */}
         {isAdmin && (

@@ -5,7 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle2, AlertCircle, FileText, ExternalLink } from 'lucide-react';
 
 const CHECKLIST_ITEMS = [
   { id: 'guest-area', label: 'Guest Area (/) loads within 5 seconds' },
@@ -20,9 +21,18 @@ const CHECKLIST_ITEMS = [
   { id: 'error-states', label: 'All error states show retry button and link to /account' },
 ];
 
+const POST_DEPLOY_VERIFICATION = [
+  { id: 'hard-refresh', label: 'Performed hard refresh (Ctrl+Shift+R / Cmd+Shift+R) after deployment' },
+  { id: 'footer-check', label: 'Verified footer or a specific UI change is visible in the new version' },
+  { id: 'key-routes', label: 'Confirmed key routes (/, /browse, /guest-account) load without stale assets' },
+  { id: 'no-console-errors', label: 'Checked browser console for no critical errors or warnings' },
+  { id: 'cache-cleared', label: 'If changes not visible, used Troubleshooting tools to clear caches' },
+];
+
 export default function PrePublishGateCard() {
   const [changeSummary, setChangeSummary] = useState('');
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const [verificationChecked, setVerificationChecked] = useState<Set<string>>(new Set());
 
   const allChecked = checkedItems.size === CHECKLIST_ITEMS.length;
   const hasSummary = changeSummary.trim().length > 10;
@@ -36,6 +46,23 @@ export default function PrePublishGateCard() {
       newChecked.delete(itemId);
     }
     setCheckedItems(newChecked);
+  };
+
+  const handleVerificationChange = (itemId: string, checked: boolean) => {
+    const newChecked = new Set(verificationChecked);
+    if (checked) {
+      newChecked.add(itemId);
+    } else {
+      newChecked.delete(itemId);
+    }
+    setVerificationChecked(newChecked);
+  };
+
+  const scrollToTroubleshooting = () => {
+    const element = document.getElementById('troubleshooting');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -120,6 +147,58 @@ export default function PrePublishGateCard() {
           </Alert>
         )}
 
+        <Separator />
+
+        {/* Post-Deploy Verification */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold">Post-Deploy Verification</label>
+            <Badge variant={verificationChecked.size === POST_DEPLOY_VERIFICATION.length ? 'default' : 'secondary'} className="text-xs">
+              {verificationChecked.size} / {POST_DEPLOY_VERIFICATION.length}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            After deployment succeeds, complete these verification steps to ensure the new build is live:
+          </p>
+          <div className="space-y-2 max-h-64 overflow-y-auto border rounded-lg p-3">
+            {POST_DEPLOY_VERIFICATION.map((item) => (
+              <div key={item.id} className="flex items-start gap-2">
+                <Checkbox
+                  id={`verify-${item.id}`}
+                  checked={verificationChecked.has(item.id)}
+                  onCheckedChange={(checked) => handleVerificationChange(item.id, checked as boolean)}
+                  className="mt-0.5"
+                />
+                <label
+                  htmlFor={`verify-${item.id}`}
+                  className="text-sm leading-tight cursor-pointer select-none"
+                >
+                  {item.label}
+                </label>
+              </div>
+            ))}
+          </div>
+          <Alert className="border-blue-500/50 bg-blue-500/10">
+            <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-xs text-blue-600 dark:text-blue-400">Stale Assets / Cache Issues?</AlertTitle>
+            <AlertDescription className="text-xs text-blue-600/80 dark:text-blue-400/80 space-y-2">
+              <p>
+                If the new build appears not to be live due to caching, use the Troubleshooting actions below 
+                to clear caches and service workers, then retry verification.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start gap-2 mt-2"
+                onClick={scrollToTroubleshooting}
+              >
+                <ExternalLink className="h-3 w-3" />
+                Go to Troubleshooting Tools
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
+
         {/* Instructions */}
         <div className="pt-4 border-t">
           <h3 className="text-sm font-semibold mb-2">Instructions</h3>
@@ -129,6 +208,7 @@ export default function PrePublishGateCard() {
             <li>Ensure Stay History section is always visible on Guest Account</li>
             <li>Check that all error states show retry buttons</li>
             <li>Do NOT publish if any item exhibits infinite loading or blank screens</li>
+            <li>After deployment, always perform a hard refresh to verify changes are live</li>
           </ul>
         </div>
       </CardContent>

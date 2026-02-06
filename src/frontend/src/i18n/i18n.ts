@@ -123,7 +123,7 @@ const en: TranslationDictionary = {
     noInstructions: 'This hotel has not configured payment instructions yet. Please contact the hotel directly or use the email method above.',
   },
   hotel: {
-    hotelArea: 'Hotel Management',
+    hotelArea: 'Hotel Area',
     manageHotel: 'Manage your hotel profile, bookings, and guest stays',
     profile: 'Profile',
     rooms: 'Rooms',
@@ -313,7 +313,7 @@ const id: TranslationDictionary = {
     noInstructions: 'Hotel ini belum mengonfigurasi instruksi pembayaran. Silakan hubungi hotel secara langsung atau gunakan metode email di atas.',
   },
   hotel: {
-    hotelArea: 'Manajemen Hotel',
+    hotelArea: 'Area Hotel',
     manageHotel: 'Kelola profil hotel, pemesanan, dan riwayat tamu Anda',
     profile: 'Profil',
     rooms: 'Kamar',
