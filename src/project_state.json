@@ -1,26 +1,44 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Sentra Guest OS (SGO) hotel booking app: align guest/hotel currency display, fix hotel-side booking history after confirmations, add guest review/rating, and update footer branding. User also requests re-trying publish/build due to deploy/build failures.",
-  "architectural_notes": [],
+  "summary": "Project is an SGO web app on Caffeine; current focus is getting Draft v53 successfully published to live and applying UI cleanup on the Account Status page (remove technical sections like Troubleshooting and Publishing & Deployment for guest/hotel users).",
+  "architectural_notes": [
+    "Caffeine deployment/publish is handled by AI/system (no manual deploy button for end users)."
+  ],
   "known_issues": [
-    "Build/deploy/publish is intermittently failing (app generation/build did not complete); user requests retry and asks how to publish"
+    "Publishing Draft v53 to live fails with generic 'AI was unable to implement your request / couldn't complete your request' error."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-an-in-app-publishing-deployment-help-section-that-explains-in-english-how-to-publish-the-app-and-what-to-do-if-a-deploy-build-fails-including-a-clear-instruction-that-if-deployment-fails-the-user-should-rerun-deployment-and-a-checklist-for-what-to-try-when-changes-are-not-visible-after-a-successful-deploy-hard-refresh-reset-app-cache-disable-offline-cache-service-worker-place-this-section-on-the-account-status-page-so-it-is-easy-to-find",
-      "title": "Add an in-app “Publishing & Deployment” help section that explains (in English) how to publish the app and what to do if a deploy/build fails, including a clear instruction that if deployment fails the user should rerun deployment, and a checklist for what to try when changes are not visible after a successful deploy (hard refresh, reset app cache, disable offline cache/service worker). Place this section on the Account Status page so it is easy to find.",
+      "id": "feature-update-the-account-status-page-to-hide-the-troubleshooting-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-and-use-troubleshooting-tools",
+      "title": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-extend-the-existing-pre-publish-gate-ui-to-include-a-small-post-deploy-verification-subsection-english-with-3-5-checkboxes-focused-on-confirming-the-new-version-is-actually-live-e-g-verify-footer-version-visible-change-reload-without-stale-cache-confirm-key-routes-load-include-a-short-note-that-if-verification-fails-due-to-stale-assets-use-the-troubleshooting-tools-to-clear-caches-and-then-retry-verification",
-      "title": "Extend the existing Pre-Publish Gate UI to include a small “Post-deploy verification” subsection (English) with 3–5 checkboxes focused on confirming the new version is actually live (e.g., verify footer/version-visible change, reload without stale cache, confirm key routes load). Include a short note that if verification fails due to stale assets, use the Troubleshooting tools to clear caches and then retry verification.",
+      "id": "feature-update-the-account-status-page-to-hide-the-publishing-deployment-help-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-publishing-deployment-guidance",
+      "title": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-revise-the-account-status-page-header-subtitle-copy-so-it-no-longer-advertises-troubleshooting-tools-to-non-admin-users-while-keeping-all-user-facing-text-in-english",
+      "title": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-perform-the-platform-publishing-step-to-publish-the-currently-deployed-draft-version-53-to-live-production-after-applying-the-agreed-ui-changes",
+      "title": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -28,31 +46,25 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Show room prices in guest account using Rupiah (IDR), consistent with hotel account",
+      "summary": "Remove/hide 'Troubleshooting' section from Account Status page for guest/hotel users (keep technical info admin-only if needed)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Fix hotel booking history: confirmed guest bookings should remain visible in hotel account for reconciliation on arrival",
+      "summary": "Remove/hide 'Publishing & Deployment' section from Account Status page for guest/hotel users (keep technical info admin-only if needed)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Enable guest users to submit reviews and ratings for hotels",
+      "summary": "Publish Draft Version 53 to live/production",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Update footer text to \"Built by Sentra Guest OS (SGO)\"",
-      "reqIds": [],
-      "status": "pending"
+      "status": "blocked"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Sentra Guest OS (SGO)",
+  "projectName": "SGO",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

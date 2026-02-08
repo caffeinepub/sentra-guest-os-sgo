@@ -2,10 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-in-app-publishing-deployment-help-section-that-explains-in-english-how-to-publish-the-app-and-what-to-do-if-a-deploy-build-fails-including-a-clear-instruction-that-if-deployment-fails-the-user-should-rerun-deployment-and-a-checklist-for-what-to-try-when-changes-are-not-visible-after-a-successful-deploy-hard-refresh-reset-app-cache-disable-offline-cache-service-worker-place-this-section-on-the-account-status-page-so-it-is-easy-to-find",
-      "featureTitle": "Add an in-app “Publishing & Deployment” help section that explains (in English) how to publish the app and what to do if a deploy/build fails, including a clear instruction that if deployment fails the user should rerun deployment, and a checklist for what to try when changes are not visible after a successful deploy (hard refresh, reset app cache, disable offline cache/service worker). Place this section on the Account Status page so it is easy to find.",
+      "featureId": "feature-update-the-account-status-page-to-hide-the-troubleshooting-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-and-use-troubleshooting-tools",
+      "featureTitle": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
       "files": [
-        "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
         "frontend/src/pages/AccountStatusPage.tsx"
       ],
       "components": [
@@ -23,10 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-extend-the-existing-pre-publish-gate-ui-to-include-a-small-post-deploy-verification-subsection-english-with-3-5-checkboxes-focused-on-confirming-the-new-version-is-actually-live-e-g-verify-footer-version-visible-change-reload-without-stale-cache-confirm-key-routes-load-include-a-short-note-that-if-verification-fails-due-to-stale-assets-use-the-troubleshooting-tools-to-clear-caches-and-then-retry-verification",
-      "featureTitle": "Extend the existing Pre-Publish Gate UI to include a small “Post-deploy verification” subsection (English) with 3–5 checkboxes focused on confirming the new version is actually live (e.g., verify footer/version-visible change, reload without stale cache, confirm key routes load). Include a short note that if verification fails due to stale assets, use the Troubleshooting tools to clear caches and then retry verification.",
+      "featureId": "feature-update-the-account-status-page-to-hide-the-publishing-deployment-help-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-publishing-deployment-guidance",
+      "featureTitle": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
       "files": [
-        "frontend/src/components/account/PrePublishGateCard.tsx"
+        "frontend/src/pages/AccountStatusPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -39,6 +38,47 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-revise-the-account-status-page-header-subtitle-copy-so-it-no-longer-advertises-troubleshooting-tools-to-non-admin-users-while-keeping-all-user-facing-text-in-english",
+      "featureTitle": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
+      "files": [
+        "frontend/src/pages/AccountStatusPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-perform-the-platform-publishing-step-to-publish-the-currently-deployed-draft-version-53-to-live-production-after-applying-the-agreed-ui-changes",
+      "featureTitle": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+      "files": [
+        "frontend/REGRESSION_CHECKLIST.md",
+        "frontend/src/components/account/PrePublishGateCard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

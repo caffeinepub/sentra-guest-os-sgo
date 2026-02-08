@@ -1,42 +1,71 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add publishing/deployment guidance and post-deploy verification UI on Account Status",
+  "title": "Account Status: hide admin technical sections for non-admin users and prep Draft v53 publish checklist",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add a “Publishing & Deployment” help section on the Account Status page with deploy-failure retry instructions and post-deploy cache troubleshooting guidance, including a direct link to the Troubleshooting tools.",
+      "summary": "Hide the Account Status “Troubleshooting” section (including separators and any #troubleshooting affordances) from non-admin authenticated users using role-based UI gating.",
       "acceptanceCriteria": [
-        "Account Status page includes a clearly titled “Publishing & Deployment” section with step-by-step guidance written in English.",
-        "The guidance explicitly covers: (1) how to publish/deploy, (2) what to do when deploy fails (retry/rerun deployment), and (3) what to do when the deploy succeeds but UI doesn’t update (hard refresh + cache/service worker actions).",
-        "The section contains a direct link/button that scrolls/navigates to the existing Troubleshooting tools on the same page (or opens them via the existing #troubleshooting anchor)."
+        "When logged in as a non-admin user, the Account Status page does not render the Troubleshooting header, description, content, or its surrounding Separator(s).",
+        "When logged in as an admin, the Troubleshooting section renders exactly as before and remains functional.",
+        "Non-admin users do not see any button or link that scrolls to #troubleshooting."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
-          "operation": "create",
-          "description": "Create a new Account Status help card/section titled “Publishing & Deployment” with English step-by-step guidance covering: how to publish/deploy, explicit instruction to rerun deployment if it fails, and a checklist for when changes aren’t visible after a successful deploy (hard refresh, reset app cache, disable offline cache/service worker). Include a Button/Link that navigates to the existing #troubleshooting anchor on the Account Status page. Verify the component's usage instructions before implementing."
-        },
-        {
           "path": "frontend/src/pages/AccountStatusPage.tsx",
           "operation": "modify",
-          "description": "Wire the new PublishingDeploymentHelpSection into the Account Status page layout so it is easy to find (near the top, alongside other status/help content). Ensure TroubleshootingSection is accessible on the same page for users who can see the help section (so the #troubleshooting link works), while keeping other admin-only tools gated as appropriate."
+          "description": "Use the authorization component’s role-based access (via existing useAccountStatus() -> callerIsAdmin) to conditionally render the Troubleshooting wrapper block and its surrounding Separator only for admins; ensure the non-admin view has no element with id=\"troubleshooting\" and no UI that references #troubleshooting. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Extend the Pre-Publish Gate UI with a “Post-deploy verification” subsection containing 3–5 verification checkboxes and a link to Troubleshooting for stale-asset/cache issues.",
+      "summary": "Hide the Account Status “Publishing & Deployment” help section from non-admin authenticated users while keeping admin behavior unchanged.",
       "acceptanceCriteria": [
-        "Pre-Publish Gate shows a dedicated post-deploy verification subsection with checkboxes.",
-        "Copy is in English and explicitly mentions using Troubleshooting actions if the new build appears not to be live due to caching.",
-        "There is a link/button from the Pre-Publish Gate area to the Troubleshooting section (or the Account Status troubleshooting anchor)."
+        "When logged in as a non-admin user, the Account Status page does not render the Publishing & Deployment card or its surrounding Separator(s).",
+        "When logged in as an admin, the Publishing & Deployment card renders and behaves as before (including any scroll-to-troubleshooting behavior)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AccountStatusPage.tsx",
+          "operation": "modify",
+          "description": "Use the authorization component’s role-based access (via existing useAccountStatus() -> callerIsAdmin) to conditionally render PublishingDeploymentHelpSection and its surrounding Separator only for admins; keep the component behavior unchanged for admins. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Revise Account Status header/subtitle copy to avoid advertising admin troubleshooting/deployment tools to non-admin users, keeping all user-facing text in English.",
+      "acceptanceCriteria": [
+        "For non-admin users, the Account Status page subtitle does not mention troubleshooting or deployment tools.",
+        "For admin users, the page may mention admin tools if desired, but all displayed text remains English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AccountStatusPage.tsx",
+          "operation": "modify",
+          "description": "Update the header subtitle to be role-aware: show an admin-focused subtitle when callerIsAdmin is true, and a neutral account-focused English subtitle for non-admins that does not mention troubleshooting or deployment. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Prepare the UI and operator checklist text for publishing Draft Version 53 to live/production after the UI changes are applied.",
+      "acceptanceCriteria": [
+        "A live/production link is produced by the platform after the publish operation completes successfully.",
+        "The live version reflects the Account Status page changes from REQ-1 and REQ-2 (non-admin users no longer see Troubleshooting or Publishing & Deployment sections)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/account/PrePublishGateCard.tsx",
           "operation": "modify",
-          "description": "Add a new “Post-deploy verification” subsection to the existing Pre-Publish Gate card with 3–5 checkboxes focused on confirming the new version is live (e.g., confirm a visible version/footer change, reload without stale cache, confirm key routes load). Include English copy noting that if verification fails due to stale assets, the user should use the Troubleshooting tools to clear caches and then retry verification. Add a Button/Link to the Account Status page’s #troubleshooting anchor. Verify the component's usage instructions before implementing."
+          "description": "Update admin-only pre-publish guidance copy (English) to explicitly reference publishing Draft Version 53 to live/production and include a post-publish verification reminder to validate that non-admins no longer see the Troubleshooting and Publishing & Deployment sections. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/REGRESSION_CHECKLIST.md",
+          "operation": "modify",
+          "description": "Add/adjust regression checklist items (English) for the Draft v53 live publish verification: confirm non-admin Account Status view does not show Troubleshooting, Publishing & Deployment, or any #troubleshooting navigation; confirm admin view remains functional."
         }
       ]
     }

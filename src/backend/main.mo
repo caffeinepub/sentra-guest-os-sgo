@@ -510,6 +510,7 @@ actor {
   };
 
   public query ({ caller }) func checkInviteToken(token : Text) : async Bool {
+    checkAuthenticated(caller);
     switch (inviteTokens.get(token)) {
       case (null) { false };
       case (?inviteToken) { not inviteToken.isConsumed };
@@ -517,7 +518,6 @@ actor {
   };
 
   public shared ({ caller }) func consumeInviteToken(token : Text) : async Bool {
-    // Should be authenticated but not admin
     checkAuthenticated(caller);
     switch (inviteTokens.get(token)) {
       case (null) { false };
@@ -553,7 +553,7 @@ actor {
     checkHotelOperationsAuthorization(caller);
 
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      checkHotelInventoryOwnership(input.hotel, caller);
+      checkHotelInventoryOwnership(caller, input.hotel);
     };
 
     let actualHotelName = switch (hotelProfiles.get(input.hotel)) {
@@ -561,8 +561,10 @@ actor {
       case (?profile) { profile.name };
     };
 
-    // Should be authenticated but not admin
-    checkAuthenticated(input.guest);
+    // Verify the guest principal is valid (not anonymous)
+    if (input.guest.isAnonymous()) {
+      Runtime.trap("Invalid guest: Cannot create stay record for anonymous principal");
+    };
 
     let stayRecord : StayRecord = {
       id = nextId;
@@ -677,7 +679,7 @@ actor {
       case (null) { Runtime.trap("No such booking request") };
       case (?request) {
         if (not AccessControl.isAdmin(accessControlState, caller)) {
-          checkHotelInventoryOwnership(request.hotel, caller);
+          checkHotelInventoryOwnership(caller, request.hotel);
         };
         let updatedRequest = { request with status = #confirmed; lastUpdated = Time.now() };
         bookingRequests.add(id, updatedRequest);
@@ -692,7 +694,7 @@ actor {
       case (null) { Runtime.trap("No such booking request") };
       case (?request) {
         if (not AccessControl.isAdmin(accessControlState, caller)) {
-          checkHotelInventoryOwnership(request.hotel, caller);
+          checkHotelInventoryOwnership(caller, request.hotel);
         };
         let updatedRequest = { request with status = #rejected; lastUpdated = Time.now() };
         bookingRequests.add(id, updatedRequest);

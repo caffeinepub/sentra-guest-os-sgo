@@ -1,40 +1,25 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T10:11:54.013Z",
-  "summary": "The diff adds a new Account Status “Publishing & Deployment” help card and updates AccountStatusPage to render it. It also extends PrePublishGateCard with a post-deploy verification checklist data structure and adds a troubleshooting scroll helper, but several acceptance-criteria details cannot be confirmed due to truncation.",
+  "generatedAt": "2026-02-08T18:14:00.738Z",
+  "summary": "REQ-1, REQ-2, and REQ-3 appear implemented on the Account Status page via admin-only conditional rendering for Troubleshooting and Publishing & Deployment, and a role-based subtitle. REQ-4 (platform publish of Draft v53 to live and producing a live link) is not evidenced in the diff summary.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Include a checklist for when a deploy succeeds but changes are not visible: hard refresh, reset app cache, disable offline cache/service worker.",
-      "reason": "The new help section shows sections for deploying and retrying failed deployments, but the portion that should contain the full post-success checklist is truncated and the required items (reset app cache; disable offline cache/service worker) are not visible in the provided diff excerpt.",
+      "id": "REQ-4",
+      "requirement": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+      "reason": "The diff summary only shows code/documentation changes; it does not show evidence of an actual platform publish operation completing, nor a produced live/production link.",
       "evidence": [
-        "frontend/src/components/account/PublishingDeploymentHelpSection.tsx (truncated after starting the 'What to Do When UI Doesn't Update After Successful Deploy' section)"
-      ]
-    },
-    {
-      "id": "REQ-1",
-      "requirement": "Provide a direct link/button that scrolls/navigates to the existing Troubleshooting tools on the Account Status page (or uses #troubleshooting anchor).",
-      "reason": "A scrollToTroubleshooting() helper exists, but the diff excerpt does not show any rendered link/button that calls it (the render is truncated before the end of the component).",
-      "evidence": [
-        "frontend/src/components/account/PublishingDeploymentHelpSection.tsx (defines scrollToTroubleshooting, but rendered button/link not shown in excerpt due to truncation)"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Show a dedicated 'Post-deploy verification' subsection in Pre-Publish Gate with 3–5 checkboxes and English copy noting to use Troubleshooting if verification fails due to caching, plus a link/button to Troubleshooting.",
-      "reason": "The diff shows a POST_DEPLOY_VERIFICATION array with 5 checkbox labels and a scrollToTroubleshooting() function, but the rendered JSX that would display the subsection, the explanatory note, and the link/button is not visible because the file is truncated.",
-      "evidence": [
-        "frontend/src/components/account/PrePublishGateCard.tsx (POST_DEPLOY_VERIFICATION defined; scrollToTroubleshooting defined; UI rendering truncated)"
+        "File diff summary: no entries indicating a publish operation or generated live link"
       ]
     }
   ],
   "hallucinated_features": [],
-  "confidence": 0.58,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/REGRESSION_CHECKLIST.md",
     "frontend/src/components/account/PrePublishGateCard.tsx",
-    "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
     "frontend/src/pages/AccountStatusPage.tsx",
     "project_state.json"
   ]

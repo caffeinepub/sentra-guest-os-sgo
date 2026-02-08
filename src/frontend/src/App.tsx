@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter, createRootRoute, createRoute, ErrorComponent } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
@@ -12,7 +12,7 @@ import HotelArea from './pages/HotelArea';
 import GuestAccountPage from './pages/GuestAccountPage';
 import AccountStatusPage from './pages/AccountStatusPage';
 import AdminPanelPage from './pages/AdminPanelPage';
-import './pwa/registerSW';
+import { cleanupServiceWorker } from './pwa/cleanupServiceWorker';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,7 +86,14 @@ declare module '@tanstack/react-router' {
   }
 }
 
-export default function App() {
+function AppWithCleanup() {
+  useEffect(() => {
+    // Run cleanup once on app startup (non-blocking)
+    cleanupServiceWorker().catch((err) => {
+      console.error('[App] SW cleanup error:', err);
+    });
+  }, []);
+
   return (
     <StrictMode>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
@@ -102,3 +109,5 @@ export default function App() {
     </StrictMode>
   );
 }
+
+export default AppWithCleanup;

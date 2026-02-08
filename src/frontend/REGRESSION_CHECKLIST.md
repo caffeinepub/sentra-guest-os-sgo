@@ -2,241 +2,189 @@
 
 ## Core Routes & Navigation
 - [ ] `/` (Guest Area) loads without errors
-- [ ] `/browse` (Browse Hotels) loads and displays hotels correctly
-- [ ] `/hotel` (Hotel Area) loads for invited users
-- [ ] `/guest-account` loads for authenticated users
-- [ ] `/account` (Account Status) loads for authenticated users
-- [ ] `/admin` (Admin Panel) loads for admin users
-- [ ] All navigation links work correctly
+- [ ] `/browse` (Browse Hotels) loads and displays hotel list
+- [ ] `/guest-account` (Guest Account) loads for authenticated users
+- [ ] `/account-status` (Account Status) loads for authenticated users
+- [ ] `/hotel-area` (Hotel Area) loads for invited/admin users
+- [ ] `/admin` (Admin Panel) loads for admin users only
+- [ ] All navigation links in header work correctly
 - [ ] Mobile menu opens and closes properly
 
 ## Authentication & Authorization
-- [ ] Login with Internet Identity works
-- [ ] Logout clears all cached data
+- [ ] Login button triggers Internet Identity flow
+- [ ] Logout clears all cached data and returns to guest view
+- [ ] Admin-only routes show access denied for non-admin users
+- [ ] Hotel Area shows invite gate for non-invited users
 - [ ] Profile setup dialog appears for first-time users
-- [ ] Admin users can access Admin Panel
-- [ ] Non-admin users see access denied on Admin Panel
-- [ ] Invited users can access Hotel Area
-- [ ] Non-invited users see invite gate on Hotel Area
 
-## Critical Query Behavior
-- [ ] All queries use `placeholderData: (previousData) => previousData` to preserve data during refetch
-- [ ] Loading states only show `true` during initial load, not during background refetch
-- [ ] Error states are handled gracefully with retry actions
-- [ ] Timeout protection is in place for all backend calls (10-15s)
-- [ ] Query invalidation works correctly after mutations
+## Account Status Page - Role-Based UI (Draft v53)
+### Non-Admin Users
+- [ ] Non-admin users do NOT see Troubleshooting section on Account Status page
+- [ ] Non-admin users do NOT see Publishing & Deployment section on Account Status page
+- [ ] Non-admin users do NOT see any #troubleshooting navigation or scroll-to links
+- [ ] Account Status page subtitle for non-admin users does NOT mention troubleshooting or deployment tools
+- [ ] Non-admin users see only: Account Status Panel and their profile information
+
+### Admin Users
+- [ ] Admin users DO see Troubleshooting section on Account Status page
+- [ ] Admin users DO see Publishing & Deployment section on Account Status page
+- [ ] Admin users can access #troubleshooting anchor and scroll-to functionality
+- [ ] Account Status page subtitle for admin users mentions admin tools
+- [ ] Admin users see all sections: Account Status Panel, Troubleshooting, Publishing & Deployment, Roadmap Planning, Admin Recovery, Pre-Publish Checklist
 
 ## Backend Stopped/Unavailable Scenario (IC0508)
 ### Navigation & Diagnostics
-- [ ] Navigate to `/` (Guest Area) with stopped backend → shows diagnostics card (no blank screen)
-- [ ] Navigate to `/browse` (Browse Hotels) with stopped backend → shows diagnostics card (no blank screen)
-- [ ] Navigate to `/hotel` (Hotel Area) with stopped backend → shows diagnostics card (no blank screen)
-- [ ] Navigate to `/guest-account` with stopped backend → shows diagnostics card (no blank screen)
-- [ ] Navigate to `/account` (Account Status) with stopped backend → shows diagnostics card (no blank screen)
-- [ ] Navigate to `/admin` (Admin Panel) with stopped backend → shows diagnostics card (no blank screen)
+- [ ] All routes remain navigable when backend is stopped
+- [ ] No infinite loading spinners on any page
+- [ ] Diagnostics card appears on all authenticated routes when backend is unavailable
+- [ ] Diagnostics card shows "Backend canister is stopped" message
+- [ ] Canister ID is extracted and displayed (copyable) in diagnostics
 
 ### Diagnostics UI
-- [ ] Stopped canister is detected and shows user-friendly message: "Backend is currently unavailable (canister stopped)"
-- [ ] Canister ID is extracted and displayed in a copyable field (when present in error)
-- [ ] Raw technical details are hidden by default
-- [ ] "Show raw technical details" toggle expands/collapses raw error message
-- [ ] No infinite loading states occur (actor initialization bounded by 15s timeout)
-- [ ] Previously loaded data remains visible during backend issues (where applicable)
+- [ ] "Show raw technical details" toggle works and displays full error
+- [ ] Principal ID is displayed and copyable
+- [ ] Authenticated status is shown correctly
+- [ ] All diagnostic information is in English
 
 ### Actions & Recovery
-- [ ] "Retry Connection" button is available and functional
-- [ ] "Hard Refresh Page" button is available (stopped-canister only) and reloads the page
-- [ ] "Open Troubleshooting Tools" button is available (stopped-canister only) and navigates to `/account#troubleshooting`
-- [ ] "Open Account Status" button navigates to `/account`
-- [ ] "Return to Home" button navigates to `/`
-- [ ] After backend restart, "Retry Connection" successfully recovers and loads data
+- [ ] "Retry Connection" button works and re-attempts backend connection
+- [ ] "Hard Refresh" button clears cache and reloads page
+- [ ] "Open Troubleshooting Tools" link navigates to Account Status page with #troubleshooting anchor (admin only)
+- [ ] "Go to Account Status" button navigates to /account-status
+- [ ] Troubleshooting section actions (Clear React Query Cache, Disable PWA Cache) work correctly (admin only)
 
-### Access Control Warning (Non-Blocking)
-- [ ] When backend is healthy but access-control init fails → shows warning banner (not blocking error)
-- [ ] Warning banner displays: "Access control initialization failed: [reason]. Some admin features may be limited."
-- [ ] Page content remains accessible below the warning
-- [ ] Admin verification continues to work despite access-control warning
-
-## Error Handling Validation
-- [ ] All error messages are in English
-- [ ] Error messages are actionable and user-friendly
-- [ ] Retry actions trigger both actor initialization and query refetch
-- [ ] No blank screens occur on error
-- [ ] Error boundaries catch runtime exceptions in admin panels
-- [ ] Toast notifications show for mutation errors
+### Access Control Warning
+- [ ] Non-blocking access control warning appears when admin verification times out
+- [ ] Warning does not prevent page content from rendering
+- [ ] Warning includes retry action that works
+- [ ] Page remains functional even with access control warning
 
 ## Guest Account & Booking Flow Tests
-### 1. Guest Account Access Test
-- [ ] Navigate to `/guest-account` while logged out
-- [ ] Verify login prompt appears
-- [ ] Login with Internet Identity
-- [ ] Guest Account page loads within 10 seconds
-- [ ] No infinite loading or blank screen occurs
+### Browse Hotels
+- [ ] Hotel list loads and displays all visible hotels
+- [ ] Country filter works correctly
+- [ ] Testing mode toggle works (shows/hides dummy hotels)
+- [ ] Hotel cards display logo, name, location correctly
+- [ ] "View Rooms" dialog opens and shows room inventory
+- [ ] "Make Booking" dialog opens with correct hotel context
 
-### 2. Guest Account CTA Test
-- [ ] Navigate to Guest Account page
-- [ ] Verify "Browse Hotels & Make a Booking" CTA is prominently displayed
-- [ ] Click the CTA button
-- [ ] Verify navigation to `/browse` route works correctly
+### Booking Creation
+- [ ] Room type selection is required and works
+- [ ] Check-in date must be in future (tomorrow minimum)
+- [ ] Check-out date must be after check-in date
+- [ ] Guest count is required
+- [ ] Booking submission succeeds for valid inputs
+- [ ] Error messages are clear and actionable
+- [ ] Success feedback is shown after booking creation
 
-### 3. Booking Creation Success Test
-- [ ] Navigate to Browse Hotels page
-- [ ] Click "Book" button on any hotel card
-- [ ] Fill in valid check-in date (future date)
-- [ ] Fill in valid check-out date (after check-in)
-- [ ] Fill in number of guests (1-20)
-- [ ] Submit booking request
-- [ ] Verify success message shows with booking ID
-- [ ] Verify payment instructions are displayed
-- [ ] Close dialog and verify booking appears in Guest Account
+### Guest Account Page
+- [ ] "Browse Hotels & Make a Booking" CTA card is prominent at top
+- [ ] Profile tab shows user profile or setup form
+- [ ] Bookings tab shows all user bookings with room type
+- [ ] Stay History tab shows past stays
+- [ ] Cancel action works for pending bookings
+- [ ] Refresh button updates data without full page reload
 
-### 4. Booking Validation Test
-- [ ] Open booking dialog
-- [ ] Try to submit with empty check-in date
-- [ ] Verify inline validation error appears
-- [ ] Try to submit with check-out before check-in
-- [ ] Verify inline validation error appears
-- [ ] Try to submit with 0 guests
-- [ ] Verify inline validation error appears
-- [ ] Verify no crash occurs during validation
+## Hotel Area Tests (Invited/Admin Users)
+### Hotel Profile
+- [ ] Profile form loads existing profile data
+- [ ] Logo upload works (preview, validation, save)
+- [ ] All fields save correctly
+- [ ] Classification dropdown works
+- [ ] Location fields (address, map link) save correctly
 
-### 5. Booking Actor Timeout Test
-- [ ] Simulate network delay (throttle to Slow 3G)
-- [ ] Open booking dialog and submit valid booking
-- [ ] Wait for timeout (10 seconds)
-- [ ] Verify timeout error message appears
-- [ ] Verify "Retry Connection" button is available
-- [ ] Click retry and verify booking can complete
+### Room Inventory
+- [ ] Room list displays all rooms
+- [ ] Add room dialog works
+- [ ] Edit room dialog pre-fills existing data
+- [ ] Delete room works with confirmation
+- [ ] Currency selection works (IDR, USD, EUR, SGD)
+- [ ] Photo upload works (preview, validation)
+- [ ] Price and promo fields save correctly
 
-### 6. Booking Cancellation Test
-- [ ] Navigate to Guest Account
-- [ ] Verify pending bookings are listed
-- [ ] Click cancel button on a pending booking
-- [ ] Confirm cancellation in dialog
-- [ ] Verify booking status updates to "Cancelled"
-- [ ] Verify toast notification shows success
+### Bookings Management
+- [ ] All bookings for hotel are displayed
+- [ ] Status filter works (All, Pending, Confirmed, Rejected, Cancelled)
+- [ ] Room type is displayed for each booking
+- [ ] Confirm action works for pending bookings
+- [ ] Reject action works for pending bookings
+- [ ] Booking details are complete and accurate
 
-### 7. Empty Bookings State Test
-- [ ] Navigate to Guest Account with no bookings
-- [ ] Verify empty state message appears
-- [ ] Verify "Browse Hotels & Make a Booking" button is present
-- [ ] Click button and verify navigation to Browse Hotels
+### Stay Recording
+- [ ] Guest Principal ID input validates format
+- [ ] Check-in/out date pickers work
+- [ ] Stay record creation succeeds
+- [ ] Success/error feedback is shown
 
-### 8. Booking Error Handling Test
-- [ ] Try to book an inactive/unpaid hotel (if available)
-- [ ] Verify user-friendly error message appears
-- [ ] Verify error does not crash the dialog
-- [ ] Verify error message is in English
-- [ ] Close and reopen dialog to verify state is reset
+### Subscription & Payment
+- [ ] Payment instructions form loads and saves
+- [ ] Instructions are shown to guests after booking
 
 ## Admin Panel Stability
-### 1. Fresh Load Test
-- [ ] Navigate to `/admin` from logged-out state
-- [ ] Login as admin
-- [ ] Admin Panel loads within 15 seconds
-- [ ] All four panels render (Invites, Visibility, Payments, Bookings)
-- [ ] No blank screens or infinite loading
+### Panel Error Isolation
+- [ ] If one admin panel fails, others remain accessible
+- [ ] Error boundary catches panel-specific errors
+- [ ] Retry action in error boundary works
+- [ ] Error messages are in English
 
-### 2. Navigation Test
-- [ ] Navigate away from Admin Panel to another route
-- [ ] Navigate back to Admin Panel
-- [ ] Panel loads without re-authentication
-- [ ] Previously loaded data is visible immediately
-- [ ] Background refetch completes without disrupting UI
+### Admin Panels
+- [ ] Next Step Selector saves selection to localStorage
+- [ ] Hotel Invite Panel generates tokens
+- [ ] Hotel Invite Panel copies tokens and links
+- [ ] Hotel Visibility Panel loads all hotels
+- [ ] Hotel Visibility Panel toggle actions work
+- [ ] Payment Review Panel loads all payment requests
+- [ ] Bookings Panel loads all system bookings
+- [ ] Admin Recovery section works (diagnostics, reset access)
 
-### 3. Retry Test
-- [ ] Simulate network delay (throttle to Slow 3G in DevTools)
-- [ ] Navigate to Admin Panel
-- [ ] Wait for timeout/error state
-- [ ] Click Retry button
-- [ ] Panel loads successfully after retry
-- [ ] No page reload required
+### Admin Panel Loading States
+- [ ] Initial load shows spinner
+- [ ] Background refetch shows inline indicator
+- [ ] Previously loaded data remains visible during refetch
+- [ ] No flash of empty state during refetch
 
-### 4. Stopped Canister Test
-- [ ] Stop the backend canister (`dfx canister stop backend`)
-- [ ] Navigate to Admin Panel
-- [ ] Verify stopped-canister detection shows user-friendly message
-- [ ] Verify raw technical details are expandable
-- [ ] Start canister (`dfx canister start backend`)
-- [ ] Click Retry
-- [ ] Panel loads successfully
+## PWA & Offline Behavior
+### Service Worker Updates
+- [ ] "New version available" toast appears when new SW is detected
+- [ ] Clicking "Later" dismisses toast and does not show again for same version
+- [ ] Clicking "Refresh Now" activates new SW and reloads page
+- [ ] Toast does not reappear repeatedly for the same waiting SW
+- [ ] No console spam from repeated update events
 
-### 5. Access Denied Test
-- [ ] Login as non-admin user
-- [ ] Navigate to `/admin`
-- [ ] Verify access denied message shows
-- [ ] Verify "View Account Status" and "Return to Home" buttons work
-- [ ] No blank screen or crash occurs
+### Caching Strategy
+- [ ] Navigation requests use network-first strategy when online
+- [ ] Static assets (JS, CSS, images) are cached appropriately
+- [ ] API/backend requests are not cached
+- [ ] Offline fallback to cached app shell works
+- [ ] No mixed old HTML/new asset states after deploy
 
-### 6. Sub-Panel Error Isolation Test
-- [ ] Login as admin
-- [ ] Navigate to Admin Panel
-- [ ] If one panel fails (e.g., Hotel Visibility), verify:
-  - [ ] Other panels still render normally
-  - [ ] Failed panel shows inline error with retry
-  - [ ] Page header and navigation remain intact
-  - [ ] No full-page crash occurs
+### Post-Deploy Verification (Draft v53)
+- [ ] After deploy, new build version is reflected in footer
+- [ ] After deploy, UI updates correctly without stuck loading
+- [ ] If stale assets persist, Troubleshooting actions resolve issue (admin only)
+- [ ] Hard refresh loads new version successfully
+- [ ] Disabling PWA cache and reloading resolves cache issues (admin only)
+- [ ] Non-admin users do NOT see Troubleshooting section after deploy
+- [ ] Non-admin users do NOT see Publishing & Deployment section after deploy
 
-### 7. Verification Timeout Test
-- [ ] Login as admin
-- [ ] Navigate to Admin Panel
-- [ ] If admin verification takes >15 seconds:
-  - [ ] Watchdog timer triggers diagnostics card
-  - [ ] Retry action is available
-  - [ ] No infinite loading occurs
+## Internationalization (i18n)
+- [ ] Language switcher toggles between English and Indonesian
+- [ ] All UI text updates when language changes
+- [ ] Language preference persists across sessions
+- [ ] No missing translation keys (no "undefined" text)
 
-### 8. Background Refetch Stability Test
-- [ ] Login as admin
-- [ ] Navigate to Admin Panel
-- [ ] Wait for initial load to complete
-- [ ] Trigger background refetch (wait for staleTime or manual refetch)
-- [ ] Verify:
-  - [ ] Previously loaded data remains visible during refetch
-  - [ ] No blank screen flicker occurs
-  - [ ] Lightweight loading indicator shows (if any)
-  - [ ] Refetch completes within 15 seconds or shows timeout
+## Error Handling
+- [ ] Timeout errors show actionable messages
+- [ ] Testing mode errors are clear
+- [ ] Hotel availability errors are specific
+- [ ] Date validation errors are helpful
+- [ ] Network errors show retry options
+- [ ] All error messages are in English
 
-## Hotel Visibility Panel Specific Tests
-- [ ] Panel uses single combined backend call (`adminGetAllHotelVisibilityStats`)
-- [ ] No per-hotel fan-out calls occur
-- [ ] Empty state shows when zero hotels exist
-- [ ] Timeout/error shows inline with Retry action (no blank screen)
-- [ ] Hotel Principal IDs are displayed correctly
-- [ ] Visibility controls (Active/Inactive, TEST, Paid/Unpaid) work correctly
-- [ ] Mutations invalidate the correct query keys
-- [ ] Error isolation: panel errors don't crash other admin panels
-
-## Data Integrity
-- [ ] Hotel profiles save correctly
-- [ ] Booking requests create successfully
-- [ ] Stay records create successfully
-- [ ] Payment requests create successfully
-- [ ] Invite tokens generate and consume correctly
-- [ ] Admin recovery works correctly
-
-## Mobile Responsiveness
-- [ ] All pages render correctly on mobile (375px width)
-- [ ] Touch interactions work properly
-- [ ] Horizontal scroll is prevented
-- [ ] Tables are horizontally scrollable on mobile
-- [ ] Forms are usable on mobile
-- [ ] Booking dialog is usable on mobile
-
-## PWA & Offline
-- [ ] Service worker registers successfully
-- [ ] App is installable on mobile
-- [ ] Offline cache works for static assets
-- [ ] Online/offline transitions are handled gracefully
-
-## Performance
-- [ ] Initial page load is under 3 seconds
-- [ ] No unnecessary re-renders occur
-- [ ] Images load efficiently
-- [ ] No memory leaks in long-running sessions
-
----
-
-**Completion Status:** [ ] All items checked and verified
-**Tester:** _________________
-**Date:** _________________
-**Notes:** _________________
+## Performance & UX
+- [ ] No unnecessary full page reloads
+- [ ] Loading states are clear and bounded
+- [ ] Mutations show inline loading indicators
+- [ ] Success feedback is immediate
+- [ ] No flash of incorrect content
+- [ ] Mobile responsive on all pages

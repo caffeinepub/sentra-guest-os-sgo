@@ -1,55 +1,105 @@
 {
   "kind": "build_request",
-  "title": "Add in-app publishing guidance and deploy-failure retry instructions",
-  "priority": "normal",
+  "title": "Hide Account Status technical sections for non-admin users and prepare Draft v53 for live publishing",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add an in-app “Publishing & Deployment” help section that explains (in English) how to publish the app and what to do if a deploy/build fails, including a clear instruction that if deployment fails the user should rerun deployment, and a checklist for what to try when changes are not visible after a successful deploy (hard refresh, reset app cache, disable offline cache/service worker). Place this section on the Account Status page so it is easy to find.",
+      "text": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-19"
         ],
         "quotes": [
-          "bagaimana publish nya? jika deploy gagal di ulangi lagi saja."
+          "YA LAKUKAN PRUBAHAN SESUAI DENGAN APA YANG SUDAG KITA BAHAS, MASA SAYA HARUS MENGULANG-ULANG SIH"
         ]
       },
       "acceptanceCriteria": [
-        "Account Status page includes a clearly titled “Publishing & Deployment” section with step-by-step guidance written in English.",
-        "The guidance explicitly covers: (1) how to publish/deploy, (2) what to do when deploy fails (retry/rerun deployment), and (3) what to do when the deploy succeeds but UI doesn’t update (hard refresh + cache/service worker actions).",
-        "The section contains a direct link/button that scrolls/navigates to the existing Troubleshooting tools on the same page (or opens them via the existing #troubleshooting anchor)."
+        "When logged in as a non-admin user, the Account Status page does not render the Troubleshooting header, description, content, or its surrounding Separator(s).",
+        "When logged in as an admin, the Troubleshooting section renders exactly as before and remains functional.",
+        "Non-admin users do not see any button or link that scrolls to #troubleshooting."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Extend the existing Pre-Publish Gate UI to include a small “Post-deploy verification” subsection (English) with 3–5 checkboxes focused on confirming the new version is actually live (e.g., verify footer/version-visible change, reload without stale cache, confirm key routes load). Include a short note that if verification fails due to stale assets, use the Troubleshooting tools to clear caches and then retry verification.",
+      "text": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-19"
         ],
         "quotes": [
-          "bagaimana publish nya? jika deploy gagal di ulangi lagi saja."
+          "YA LAKUKAN PRUBAHAN SESUAI DENGAN APA YANG SUDAG KITA BAHAS, MASA SAYA HARUS MENGULANG-ULANG SIH"
         ]
       },
       "acceptanceCriteria": [
-        "Pre-Publish Gate shows a dedicated post-deploy verification subsection with checkboxes.",
-        "Copy is in English and explicitly mentions using Troubleshooting actions if the new build appears not to be live due to caching.",
-        "There is a link/button from the Pre-Publish Gate area to the Troubleshooting section (or the Account Status troubleshooting anchor)."
+        "When logged in as a non-admin user, the Account Status page does not render the Publishing & Deployment card or its surrounding Separator(s).",
+        "When logged in as an admin, the Publishing & Deployment card renders and behaves as before (including any scroll-to-troubleshooting behavior)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-19"
+        ],
+        "quotes": [
+          "Use English for any user-facing text in the build request."
+        ]
+      },
+      "acceptanceCriteria": [
+        "For non-admin users, the Account Status page subtitle does not mention troubleshooting or deployment tools.",
+        "For admin users, the page may mention admin tools if desired, but all displayed text remains English."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+      "target": "unknown",
+      "source": {
+        "messageIds": [
+          "msg-12",
+          "msg-14",
+          "msg-19"
+        ],
+        "quotes": [
+          "publish skarang",
+          "ya sudah laukan publish live nya'",
+          "YA LAKUKAN PRUBAHAN SESUAI DENGAN APA YANG SUDAG KITA BAHAS, MASA SAYA HARUS MENGULANG-ULANG SIH"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A live/production link is produced by the platform after the publish operation completes successfully.",
+        "The live version reflects the Account Status page changes from REQ-1 and REQ-2 (non-admin users no longer see Troubleshooting or Publishing & Deployment sections)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui (Shadcn components must be composed, not modified).",
-    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, or frontend/src/main.tsx (immutable paths)."
+    "Do not modify any files under frontend/src/components/ui (read-only UI component sources).",
+    "Do not modify any paths listed in SYSTEM_CONTEXT.frontend.immutablePaths.",
+    "Keep backend as a single Motoko actor (no additional backend services).",
+    "All user-facing text must be English."
   ],
   "nonGoals": [
-    "Do not implement actual automated deployment/publishing or CI logic; only add in-app guidance and verification UI.",
-    "Do not add new authentication providers or payment methods."
+    "Do not add new authentication methods (Internet Identity remains the only auth method).",
+    "Do not introduce new features unrelated to Account Status page cleanup or publishing Draft v53.",
+    "Do not add external databases or third-party backend services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

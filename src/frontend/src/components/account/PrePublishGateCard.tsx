@@ -27,6 +27,8 @@ const POST_DEPLOY_VERIFICATION = [
   { id: 'key-routes', label: 'Confirmed key routes (/, /browse, /guest-account) load without stale assets' },
   { id: 'no-console-errors', label: 'Checked browser console for no critical errors or warnings' },
   { id: 'cache-cleared', label: 'If changes not visible, used Troubleshooting tools to clear caches' },
+  { id: 'non-admin-troubleshooting', label: 'Verified non-admin users do NOT see Troubleshooting section on Account Status' },
+  { id: 'non-admin-publishing', label: 'Verified non-admin users do NOT see Publishing & Deployment section on Account Status' },
 ];
 
 export default function PrePublishGateCard() {
@@ -73,9 +75,9 @@ export default function PrePublishGateCard() {
             <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <CardTitle className="text-lg sm:text-xl">Pre-Publish Gate</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Pre-Publish Gate - Draft Version 53</CardTitle>
             <CardDescription className="text-sm">
-              Complete this checklist before deploying changes
+              Complete this checklist before publishing Draft Version 53 to live/production
             </CardDescription>
           </div>
         </div>
@@ -130,9 +132,9 @@ export default function PrePublishGateCard() {
         {isReadyToPublish ? (
           <Alert className="border-green-500/50 bg-green-500/10">
             <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertTitle className="text-green-600 dark:text-green-400">Ready to Publish</AlertTitle>
+            <AlertTitle className="text-green-600 dark:text-green-400">Ready to Publish Draft Version 53</AlertTitle>
             <AlertDescription className="text-xs text-green-600/80 dark:text-green-400/80">
-              All checklist items are complete and change summary is provided. You may proceed with deployment.
+              All checklist items are complete and change summary is provided. You may proceed with publishing Draft Version 53 to live/production.
             </AlertDescription>
           </Alert>
         ) : (
@@ -158,7 +160,7 @@ export default function PrePublishGateCard() {
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            After deployment succeeds, complete these verification steps to ensure the new build is live:
+            After publishing Draft Version 53 to live/production, complete these verification steps to ensure the new build is live and that non-admin users no longer see Troubleshooting and Publishing & Deployment sections:
           </p>
           <div className="space-y-2 max-h-64 overflow-y-auto border rounded-lg p-3">
             {POST_DEPLOY_VERIFICATION.map((item) => (
@@ -209,6 +211,7 @@ export default function PrePublishGateCard() {
             <li>Check that all error states show retry buttons</li>
             <li>Do NOT publish if any item exhibits infinite loading or blank screens</li>
             <li>After deployment, always perform a hard refresh to verify changes are live</li>
+            <li>Verify non-admin users do NOT see Troubleshooting or Publishing & Deployment sections on Account Status page</li>
           </ul>
         </div>
       </CardContent>

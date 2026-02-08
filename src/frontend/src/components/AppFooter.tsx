@@ -1,34 +1,23 @@
-import { Heart } from 'lucide-react';
-import { useI18n } from '../i18n/I18nProvider';
+import { SiCaffeine } from 'react-icons/si';
 
 export default function AppFooter() {
-  const { t } = useI18n();
-  
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="border-t bg-muted/30 mt-auto">
-      <div className="container py-6 px-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p className="text-center sm:text-left">
-            © 2026. {t('footer.builtWith')}{' '}
-            <Heart className="inline h-4 w-4 text-red-500 fill-red-500" />{' '}
-            <a
-              href="https://caffeine.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              caffeine.ai
-            </a>
-          </p>
-          <p className="text-center sm:text-right">
-            <a
-              href="mailto:sentraguestos.info@gmail.com"
-              className="text-primary hover:underline"
-            >
-              sentraguestos.info@gmail.com
-            </a>
-          </p>
-        </div>
+    <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex flex-col items-center justify-center gap-2 py-6 text-center text-sm text-muted-foreground">
+        <p className="flex items-center gap-1.5">
+          © {currentYear}. Built with love using{' '}
+          <a
+            href="https://caffeine.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
+          >
+            <SiCaffeine className="h-4 w-4" />
+            caffeine.ai
+          </a>
+        </p>
       </div>
     </footer>
   );

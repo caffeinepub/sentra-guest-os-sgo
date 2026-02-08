@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Copy, User, Shield, Key, CheckCircle, XCircle, Loader2, RefreshCw, ChevronDown, Bug } from 'lucide-react';
+import { Copy, User, Shield, Key, CheckCircle, XCircle, Loader2, RefreshCw, ChevronDown, Bug, Code } from 'lucide-react';
 import { toast } from 'sonner';
+import { buildInfo } from '../../buildInfo';
 
 export default function AccountStatusPanel() {
   const { identity } = useInternetIdentity();
@@ -35,6 +36,11 @@ export default function AccountStatusPanel() {
       navigator.clipboard.writeText(diagnostics.caller.toString());
       toast.success('Diagnostic Principal ID copied to clipboard');
     }
+  };
+
+  const handleCopyBuildVersion = () => {
+    navigator.clipboard.writeText(buildInfo.version);
+    toast.success('Build version copied to clipboard');
   };
 
   const handleRefresh = async () => {
@@ -79,6 +85,30 @@ export default function AccountStatusPanel() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Build Version */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Code className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Build Version</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 rounded bg-muted px-3 py-2 text-xs font-mono">
+              {buildInfo.version}
+            </code>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleCopyBuildVersion}
+              className="flex-shrink-0"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            This version changes with each deployment. Use it to verify you're seeing the latest build.
+          </p>
+        </div>
+
         {/* Principal ID */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">

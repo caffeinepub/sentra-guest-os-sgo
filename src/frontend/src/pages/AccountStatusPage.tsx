@@ -37,16 +37,39 @@ function AccountStatusContent() {
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-bold">Account Status</h1>
           <p className="text-base sm:text-lg text-muted-foreground">
-            View your account details and troubleshooting tools
+            {isAdmin 
+              ? 'View your account details, troubleshooting tools, and admin controls'
+              : 'View your account details and profile information'
+            }
           </p>
         </div>
 
         {/* Account Status Panel - Always visible */}
         <AccountStatusPanel />
 
-        {/* Publishing & Deployment Help - Always visible for authenticated users */}
-        <Separator />
-        <PublishingDeploymentHelpSection />
+        {/* Troubleshooting - Admin only */}
+        {isAdmin && (
+          <>
+            <Separator />
+            <div className="space-y-4" id="troubleshooting">
+              <div>
+                <h2 className="text-xl font-bold">Troubleshooting</h2>
+                <p className="text-sm text-muted-foreground">
+                  Actions for debugging cache and update issues
+                </p>
+              </div>
+              <TroubleshootingSection />
+            </div>
+          </>
+        )}
+
+        {/* Publishing & Deployment Help - Admin only */}
+        {isAdmin && (
+          <>
+            <Separator />
+            <PublishingDeploymentHelpSection />
+          </>
+        )}
 
         {/* Admin-only sections */}
         {isAdmin && (
@@ -93,19 +116,6 @@ function AccountStatusContent() {
                 </p>
               </div>
               <PrePublishGateCard />
-            </div>
-
-            <Separator />
-
-            {/* Troubleshooting */}
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-bold">Troubleshooting</h2>
-                <p className="text-sm text-muted-foreground">
-                  Advanced actions for debugging issues
-                </p>
-              </div>
-              <TroubleshootingSection />
             </div>
           </>
         )}
