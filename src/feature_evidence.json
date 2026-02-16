@@ -2,10 +2,15 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-account-status-page-to-hide-the-troubleshooting-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-and-use-troubleshooting-tools",
-      "featureTitle": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
+      "featureId": "feature-add-a-persistent-review-rating-feature-where-both-guest-accounts-and-hotel-accounts-can-create-a-review-with-a-1-5-star-rating-and-optional-text-and-list-existing-reviews",
+      "featureTitle": "Add a persistent Review/Rating feature where both Guest accounts and Hotel accounts can create a review with a 1–5 star rating and optional text, and list existing reviews.",
       "files": [
-        "frontend/src/pages/AccountStatusPage.tsx"
+        "frontend/src/components/reviews/ReviewSubmitCard.tsx",
+        "frontend/src/components/reviews/ReviewsListCard.tsx",
+        "frontend/src/components/reviews/StarRatingField.tsx",
+        "frontend/src/hooks/useReviews.ts",
+        "frontend/src/pages/GuestAccountPage.tsx",
+        "frontend/src/pages/HotelArea.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -22,10 +27,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-account-status-page-to-hide-the-publishing-deployment-help-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-publishing-deployment-guidance",
-      "featureTitle": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
+      "featureId": "feature-update-the-hotel-account-bookings-section-so-its-booking-list-layout-model-matches-the-admin-bookings-panel-layout-model-scrollable-list-consistent-card-structure-and-key-booking-metadata",
+      "featureTitle": "Update the Hotel Account bookings section so its booking list layout/model matches the Admin bookings panel layout model (scrollable list, consistent card structure, and key booking metadata).",
       "files": [
-        "frontend/src/pages/AccountStatusPage.tsx"
+        "frontend/src/components/bookings/HotelBookingsSection.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,10 +47,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-revise-the-account-status-page-header-subtitle-copy-so-it-no-longer-advertises-troubleshooting-tools-to-non-admin-users-while-keeping-all-user-facing-text-in-english",
-      "featureTitle": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
+      "featureId": "feature-add-booking-actions-requested-by-role-hotel-account-must-have-cancel-and-delete-actions-guest-account-must-have-cancel-action-only",
+      "featureTitle": "Add booking actions requested by role: Hotel Account must have Cancel and Delete actions; Guest Account must have Cancel action only.",
       "files": [
-        "frontend/src/pages/AccountStatusPage.tsx"
+        "frontend/src/components/bookings/GuestBookingsSection.tsx",
+        "frontend/src/components/bookings/HotelBookingsSection.tsx",
+        "frontend/src/hooks/useBookings.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -62,10 +69,9 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-perform-the-platform-publishing-step-to-publish-the-currently-deployed-draft-version-53-to-live-production-after-applying-the-agreed-ui-changes",
-      "featureTitle": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+      "featureId": "feature-ensure-the-requested-changes-are-implemented-and-verifiable-before-any-publish-deploy-guidance-is-shown-as-ready-and-add-clear-ui-messaging-that-publishing-should-not-occur-until-the-requested-revisions-are-complete",
+      "featureTitle": "Ensure the requested changes are implemented and verifiable before any publish/deploy guidance is shown as 'ready', and add clear UI messaging that publishing should not occur until the requested revisions are complete.",
       "files": [
-        "frontend/REGRESSION_CHECKLIST.md",
         "frontend/src/components/account/PrePublishGateCard.tsx"
       ],
       "components": [
@@ -79,6 +85,26 @@
       ],
       "testIds": [
         "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-handle-invalid-published-url-situations-by-improving-user-facing-guidance-when-the-app-url-does-not-resolve-to-a-canister-e-g-gateway-canister-id-not-resolved-including-troubleshooting-steps-to-reach-the-correct-live-url",
+      "featureTitle": "Fix/handle invalid published URL situations by improving user-facing guidance when the app URL does not resolve to a canister (e.g., gateway 'Canister ID Not Resolved'), including troubleshooting steps to reach the correct live URL.",
+      "files": [
+        "frontend/src/components/account/PublishingDeploymentHelpSection.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
       ],
       "confidence": "high"
     }

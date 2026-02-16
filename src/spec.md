@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Restrict Account Status technical/admin guidance to admins only, and publish Draft Version 53 live after the UI updates.
+**Goal:** Add reviews/ratings for guests and hotels, align Hotel Account bookings UI with the Admin bookings model, and add cancel/delete booking actions with clearer publishing and URL troubleshooting guidance.
 
 **Planned changes:**
-- Hide the Account Status “Troubleshooting” section (including its header/content and any surrounding separators) for non-admin authenticated users; keep it unchanged and functional for admins.
-- Hide the Account Status “Publishing & Deployment” help card (and any surrounding separators) for non-admin authenticated users; keep it unchanged and functional for admins.
-- Adjust the Account Status header/subtitle copy so non-admin users are not told about troubleshooting or deployment tools, keeping all user-facing text in English.
-- Perform the platform publishing step to publish Draft Version 53 to live/production after applying the above UI changes.
+- Add persistent Reviews/Ratings (1–5 stars + optional text) so both Guest and Hotel accounts can create reviews and view review lists (by hotel and by the caller), with authenticated/authorized backend enforcement.
+- Update the Hotel Account bookings list UI to match the Admin bookings panel model (scrollable list, consistent booking card layout, and key booking metadata) without breaking confirm/reject flows.
+- Add booking actions by role: Guest Account gets Cancel; Hotel Account gets Cancel and Delete; include confirmation prompts and success/error toasts; enforce backend ownership/authorization and refresh booking lists after actions.
+- Add English UI messaging to prevent publishing guidance being treated as “ready” until Reviews/Ratings and booking UI/actions changes are verified.
+- Improve English publishing/deployment help guidance for invalid published URL cases (e.g., “Canister ID Not Resolved”) with troubleshooting steps to obtain the correct live URL from existing deployment outputs.
 
-**User-visible outcome:** Non-admin users see a simplified Account Status page without Troubleshooting or Publishing/Deployment guidance, while admins continue to see and use those tools; the updated Draft v53 is published to a live/production link.
+**User-visible outcome:** Guests and hotels can submit and view reviews with star ratings, hotel bookings display in the same style as admin bookings, guests can cancel bookings, hotels can cancel or delete their bookings, and the app provides clearer English guidance about when it’s ready to publish and how to fix “Canister ID Not Resolved” URL issues.

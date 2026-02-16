@@ -7,6 +7,11 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface AdminHotelVisibilityView {
+    hotel: Principal;
+    visibility: PersistentHotelVisibility;
+    profile?: HotelProfile;
+}
 export type Time = bigint;
 export interface CreateStayRecordInput {
     hotelName: string;
@@ -111,14 +116,24 @@ export interface PaymentRequest {
     reference: string;
     amount: bigint;
 }
+export interface ReviewInput {
+    comment?: string;
+    targetType: string;
+    rating: bigint;
+    targetId: Principal;
+}
+export interface Review {
+    id: bigint;
+    createdAt: Time;
+    comment?: string;
+    targetType: string;
+    rating: bigint;
+    reviewer: Principal;
+    targetId: Principal;
+}
 export interface UserProfile {
     name: string;
     email: string;
-}
-export interface AdminHotelVisibilityView {
-    hotel: Principal;
-    visibility: PersistentHotelVisibility;
-    profile?: HotelProfile;
 }
 export enum BookingStatus {
     cancelled = "cancelled",
@@ -160,6 +175,7 @@ export interface backendInterface {
     adminRecoveryDiagnostics(): Promise<AdminRecoveryDiagnostics>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     cancelBooking(id: bigint): Promise<void>;
+    cancelHotelBooking(id: bigint): Promise<void>;
     checkInviteToken(token: string): Promise<boolean>;
     confirmBooking(id: bigint): Promise<void>;
     confirmPaymentRequest(id: string): Promise<void>;
@@ -167,6 +183,7 @@ export interface backendInterface {
     createBookingRequest(input: CreateBookingInput): Promise<bigint>;
     createPaymentRequest(amount: bigint, id: string, reference: string, option: PaymentOption): Promise<string>;
     createStayRecord(input: CreateStayRecordInput): Promise<bigint>;
+    deleteHotelBooking(id: bigint): Promise<void>;
     deleteRoomInventory(hotelPrincipal: Principal, roomType: string): Promise<void>;
     generateHotelInviteToken(token: string): Promise<string>;
     generateInviteCode(): Promise<string>;
@@ -176,6 +193,7 @@ export interface backendInterface {
     getAllInviteTokens(): Promise<Array<InviteToken>>;
     getAllPaymentRequests(): Promise<Array<PaymentRequest>>;
     getAllRSVPs(): Promise<Array<RSVP>>;
+    getAllReviews(): Promise<Array<Review>>;
     getBookingRequest(id: bigint): Promise<BookingRequest>;
     getCallerPendingBookings(): Promise<Array<BookingRequest>>;
     getCallerProcessingBookings(): Promise<Array<BookingRequest>>;
@@ -189,6 +207,8 @@ export interface backendInterface {
     getHotelsByCountry(country: string): Promise<Array<HotelProfile>>;
     getInviteCodes(): Promise<Array<InviteCode>>;
     getPaymentRequest(id: string): Promise<PaymentRequest>;
+    getReview(id: bigint): Promise<Review | null>;
+    getReviewsByTarget(targetType: string, targetId: Principal): Promise<Array<Review>>;
     getTestingMode(): Promise<boolean>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     health(): Promise<HealthStatus>;
@@ -203,5 +223,6 @@ export interface backendInterface {
     setHotelVisibility(hotel: Principal, isActive: boolean, isDummyHotel: boolean): Promise<void>;
     setTestingMode(enabled: boolean): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
+    submitReview(input: ReviewInput): Promise<bigint>;
     updateRoomInventory(hotelPrincipal: Principal, room: RoomInventory): Promise<void>;
 }

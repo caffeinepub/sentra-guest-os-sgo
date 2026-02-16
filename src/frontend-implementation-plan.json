@@ -1,71 +1,124 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Account Status: hide admin technical sections for non-admin users and prep Draft v53 publish checklist",
+  "title": "Reviews/Ratings UI + Booking actions & Hotel bookings UI alignment + Publishing/troubleshooting messaging",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Hide the Account Status “Troubleshooting” section (including separators and any #troubleshooting affordances) from non-admin authenticated users using role-based UI gating.",
+      "summary": "Add Reviews/Ratings UI for Guest Account and Hotel Area to submit 1–5 star reviews with optional text and list existing reviews.",
       "acceptanceCriteria": [
-        "When logged in as a non-admin user, the Account Status page does not render the Troubleshooting header, description, content, or its surrounding Separator(s).",
-        "When logged in as an admin, the Troubleshooting section renders exactly as before and remains functional.",
-        "Non-admin users do not see any button or link that scrolls to #troubleshooting."
+        "Frontend adds UI in Guest Account and Hotel Area to: (1) submit a review (rating + optional text) and (2) view a list of reviews with rating and date.",
+        "All user-facing text in the new UI is in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AccountStatusPage.tsx",
+          "path": "frontend/src/hooks/useReviews.ts",
+          "operation": "create",
+          "description": "Add React Query hooks for review capabilities using existing backend methods (submitReview, getReviewsByTarget, getAllReviews / getReview as needed), including principal-scoped query keys, error normalization, and cache invalidation after submission. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/reviews/StarRatingField.tsx",
+          "operation": "create",
+          "description": "Create a small reusable star-rating input/display component (1–5) for review submission and read-only display, keeping all new user-facing text in English. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/reviews/ReviewSubmitCard.tsx",
+          "operation": "create",
+          "description": "Create a review submission card that accepts target principal + targetType, allows selecting rating (1–5) and optional comment, requires authentication via existing app guards, and shows success/error toasts. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/reviews/ReviewsListCard.tsx",
+          "operation": "create",
+          "description": "Create a reviews list card that loads reviews for a given target (hotel principal) and renders rating + optional comment + created date, plus empty/loading/error states with retry. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/GuestAccountPage.tsx",
           "operation": "modify",
-          "description": "Use the authorization component’s role-based access (via existing useAccountStatus() -> callerIsAdmin) to conditionally render the Troubleshooting wrapper block and its surrounding Separator only for admins; ensure the non-admin view has no element with id=\"troubleshooting\" and no UI that references #troubleshooting. Verify the component's usage instructions before implementing."
+          "description": "Wire the new review UI into the Guest Account page by adding a dedicated 'Reviews' section that lets a guest submit a review for a selected hotel (target hotel principal) and view reviews for that selected hotel; ensure all labels/help text are English. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/HotelArea.tsx",
+          "operation": "modify",
+          "description": "Wire the new review UI into the Hotel Area by adding a section/tab that (a) lists reviews for the current hotel and (b) allows the hotel account to submit a review (as themselves) targeting a hotel principal; keep all UI strings English. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Hide the Account Status “Publishing & Deployment” help section from non-admin authenticated users while keeping admin behavior unchanged.",
+      "summary": "Align Hotel Account bookings list UI with Admin bookings panel layout model (scrollable list, consistent card structure, key metadata).",
       "acceptanceCriteria": [
-        "When logged in as a non-admin user, the Account Status page does not render the Publishing & Deployment card or its surrounding Separator(s).",
-        "When logged in as an admin, the Publishing & Deployment card renders and behaves as before (including any scroll-to-troubleshooting behavior)."
+        "Hotel bookings list uses a scrollable list (similar to AdminBookingsPanel) when there are many bookings.",
+        "Each booking card shows at minimum: booking id, status badge, guest principal (or truncated), room type, check-in/out dates, guests count, created date.",
+        "No regressions to existing hotel booking confirm/reject flows."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AccountStatusPage.tsx",
+          "path": "frontend/src/components/bookings/HotelBookingsSection.tsx",
           "operation": "modify",
-          "description": "Use the authorization component’s role-based access (via existing useAccountStatus() -> callerIsAdmin) to conditionally render PublishingDeploymentHelpSection and its surrounding Separator only for admins; keep the component behavior unchanged for admins. Verify the component's usage instructions before implementing."
+          "description": "Refactor the Hotel bookings list UI to match the AdminBookingsPanel layout model: use a ScrollArea for long lists, adopt a consistent card/header structure, and ensure each card displays required metadata (booking id, status badge, guest principal/truncated, room type, check-in/out, guests count, created date) without breaking confirm/reject flows. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Revise Account Status header/subtitle copy to avoid advertising admin troubleshooting/deployment tools to non-admin users, keeping all user-facing text in English.",
+      "summary": "Add booking actions by role: Guest can Cancel; Hotel can Cancel and Delete, with confirmations and success/error toasts and list refresh.",
       "acceptanceCriteria": [
-        "For non-admin users, the Account Status page subtitle does not mention troubleshooting or deployment tools.",
-        "For admin users, the page may mention admin tools if desired, but all displayed text remains English."
+        "Guest Account: a visible Cancel action is available for cancellable bookings, and it calls the backend cancellation method and refreshes booking lists.",
+        "Hotel Account: a visible Cancel action is available for bookings belonging to the hotel and cancels the booking via a backend method, then refreshes hotel/admin/guest booking queries.",
+        "Hotel Account: a visible Delete action is available for bookings belonging to the hotel and deletes the booking via a backend method, then refreshes hotel/admin/guest booking queries.",
+        "Delete is not available in Guest Account.",
+        "UI shows confirmation prompts for cancel/delete and shows success/error toasts."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AccountStatusPage.tsx",
+          "path": "frontend/src/hooks/useBookings.ts",
           "operation": "modify",
-          "description": "Update the header subtitle to be role-aware: show an admin-focused subtitle when callerIsAdmin is true, and a neutral account-focused English subtitle for non-admins that does not mention troubleshooting or deployment. Verify the component's usage instructions before implementing."
+          "description": "Add hotel booking mutations for cancel/delete using existing backend capabilities (cancelHotelBooking, deleteHotelBooking), including robust timeout/error handling and broad query invalidation to refresh guest/hotel/admin booking queries; also adjust existing cancel logic if needed to better reflect 'cancellable' statuses. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/bookings/GuestBookingsSection.tsx",
+          "operation": "modify",
+          "description": "Ensure Guest bookings show a clearly labeled Cancel action (button) only when a booking is cancellable; keep Delete unavailable; add confirmation prompt and success/error toasts; ensure list refresh happens after mutation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/bookings/HotelBookingsSection.tsx",
+          "operation": "modify",
+          "description": "Add Hotel Cancel and Delete actions to booking cards with role-appropriate visibility, confirmation prompts, and success/error toasts; call the corresponding hotel mutations and ensure queries refresh across hotel/admin/guest views while keeping confirm/reject intact. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Prepare the UI and operator checklist text for publishing Draft Version 53 to live/production after the UI changes are applied.",
+      "summary": "Add explicit English UI messaging warning not to publish until requested revisions (reviews/ratings + booking UI/actions) are implemented and verified.",
       "acceptanceCriteria": [
-        "A live/production link is produced by the platform after the publish operation completes successfully.",
-        "The live version reflects the Account Status page changes from REQ-1 and REQ-2 (non-admin users no longer see Troubleshooting or Publishing & Deployment sections)."
+        "Account/Publishing-related UI (e.g., pre-publish checklist content) includes explicit English messaging that this release must not be published until 'Reviews/Ratings' and 'Booking actions (cancel/delete) & hotel booking UI alignment' are verified.",
+        "No existing features outside the requested scope are modified beyond what is necessary to support the new review/rating and booking action changes."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/account/PrePublishGateCard.tsx",
           "operation": "modify",
-          "description": "Update admin-only pre-publish guidance copy (English) to explicitly reference publishing Draft Version 53 to live/production and include a post-publish verification reminder to validate that non-admins no longer see the Troubleshooting and Publishing & Deployment sections. Verify the component's usage instructions before implementing."
+          "description": "Update the pre-publish checklist and the 'Not Ready to Publish' messaging to explicitly require verification of (1) Reviews/Ratings and (2) Booking actions (cancel/delete) & Hotel booking UI alignment before publishing; keep all added copy in English. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/REGRESSION_CHECKLIST.md",
+          "path": "frontend/src/pages/AccountStatusPage.tsx",
           "operation": "modify",
-          "description": "Add/adjust regression checklist items (English) for the Draft v53 live publish verification: confirm non-admin Account Status view does not show Troubleshooting, Publishing & Deployment, or any #troubleshooting navigation; confirm admin view remains functional."
+          "description": "Ensure the updated pre-publish gate messaging is visible in the Account Status flow where publishing guidance appears, without adding new routes/pages and without changing unrelated features. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Improve user-facing publishing/deployment guidance for invalid URL situations like 'Canister ID Not Resolved' with steps to find the correct live URL from deployment outputs.",
+      "acceptanceCriteria": [
+        "Add an English troubleshooting note in the existing deployment/publishing help UI explaining what 'Canister ID Not Resolved' means and how to obtain the correct live URL from the deployment UI.",
+        "Guidance does not require external services; it only references the app/editor deployment outputs already available to the user."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
+          "operation": "modify",
+          "description": "Add an English troubleshooting subsection for 'Canister ID Not Resolved' explaining it indicates the URL is not pointing at a deployed canister, and provide steps to retrieve/copy the correct live URL from the deployment/publishing outputs shown in the app/editor UI; avoid referencing external services. Verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -109,6 +109,21 @@ export interface RSVP {
   'timestamp' : Time,
   'attending' : boolean,
 }
+export interface Review {
+  'id' : bigint,
+  'createdAt' : Time,
+  'comment' : [] | [string],
+  'targetType' : string,
+  'rating' : bigint,
+  'reviewer' : Principal,
+  'targetId' : Principal,
+}
+export interface ReviewInput {
+  'comment' : [] | [string],
+  'targetType' : string,
+  'rating' : bigint,
+  'targetId' : Principal,
+}
 export type RoomCurrency = { 'EUR' : null } |
   { 'IDR' : null } |
   { 'SGD' : null } |
@@ -143,6 +158,7 @@ export interface _SERVICE {
   'adminRecoveryDiagnostics' : ActorMethod<[], AdminRecoveryDiagnostics>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'cancelBooking' : ActorMethod<[bigint], undefined>,
+  'cancelHotelBooking' : ActorMethod<[bigint], undefined>,
   'checkInviteToken' : ActorMethod<[string], boolean>,
   'confirmBooking' : ActorMethod<[bigint], undefined>,
   'confirmPaymentRequest' : ActorMethod<[string], undefined>,
@@ -153,6 +169,7 @@ export interface _SERVICE {
     string
   >,
   'createStayRecord' : ActorMethod<[CreateStayRecordInput], bigint>,
+  'deleteHotelBooking' : ActorMethod<[bigint], undefined>,
   'deleteRoomInventory' : ActorMethod<[Principal, string], undefined>,
   'generateHotelInviteToken' : ActorMethod<[string], string>,
   'generateInviteCode' : ActorMethod<[], string>,
@@ -165,6 +182,7 @@ export interface _SERVICE {
   'getAllInviteTokens' : ActorMethod<[], Array<InviteToken>>,
   'getAllPaymentRequests' : ActorMethod<[], Array<PaymentRequest>>,
   'getAllRSVPs' : ActorMethod<[], Array<RSVP>>,
+  'getAllReviews' : ActorMethod<[], Array<Review>>,
   'getBookingRequest' : ActorMethod<[bigint], BookingRequest>,
   'getCallerPendingBookings' : ActorMethod<[], Array<BookingRequest>>,
   'getCallerProcessingBookings' : ActorMethod<[], Array<BookingRequest>>,
@@ -178,6 +196,8 @@ export interface _SERVICE {
   'getHotelsByCountry' : ActorMethod<[string], Array<HotelProfile>>,
   'getInviteCodes' : ActorMethod<[], Array<InviteCode>>,
   'getPaymentRequest' : ActorMethod<[string], PaymentRequest>,
+  'getReview' : ActorMethod<[bigint], [] | [Review]>,
+  'getReviewsByTarget' : ActorMethod<[string, Principal], Array<Review>>,
   'getTestingMode' : ActorMethod<[], boolean>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'health' : ActorMethod<[], HealthStatus>,
@@ -192,6 +212,7 @@ export interface _SERVICE {
   'setHotelVisibility' : ActorMethod<[Principal, boolean, boolean], undefined>,
   'setTestingMode' : ActorMethod<[boolean], undefined>,
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
+  'submitReview' : ActorMethod<[ReviewInput], bigint>,
   'updateRoomInventory' : ActorMethod<[Principal, RoomInventory], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

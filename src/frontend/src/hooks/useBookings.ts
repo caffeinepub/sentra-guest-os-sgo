@@ -130,7 +130,60 @@ export function useCancelBooking() {
       queryClient.invalidateQueries({ queryKey: ['guestPendingBookings', principalId] });
       queryClient.invalidateQueries({ queryKey: ['guestProcessingBookings', principalId] });
       queryClient.invalidateQueries({ queryKey: ['hotelBookings'] });
-      queryClient.invalidateQueries({ queryKey: ['hotelPendingBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['allBookings'] });
+    },
+  });
+}
+
+export function useCancelHotelBooking() {
+  const { actor } = useActorSafe();
+  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
+
+  return useMutation({
+    mutationFn: async (bookingId: bigint) => {
+      if (!actor) throw new Error('Connection not available. Please retry.');
+      try {
+        return await withTimeout(
+          actor.cancelHotelBooking(bookingId),
+          10000,
+          'Booking cancellation timed out after 10 seconds. Please retry.'
+        );
+      } catch (error: unknown) {
+        throw new Error(getErrorMessage(error));
+      }
+    },
+    onSuccess: () => {
+      const principalId = identity?.getPrincipal().toString() ?? 'anonymous';
+      queryClient.invalidateQueries({ queryKey: ['hotelBookings', principalId] });
+      queryClient.invalidateQueries({ queryKey: ['guestProcessingBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['allBookings'] });
+    },
+  });
+}
+
+export function useDeleteHotelBooking() {
+  const { actor } = useActorSafe();
+  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
+
+  return useMutation({
+    mutationFn: async (bookingId: bigint) => {
+      if (!actor) throw new Error('Connection not available. Please retry.');
+      try {
+        return await withTimeout(
+          actor.deleteHotelBooking(bookingId),
+          10000,
+          'Booking deletion timed out after 10 seconds. Please retry.'
+        );
+      } catch (error: unknown) {
+        throw new Error(getErrorMessage(error));
+      }
+    },
+    onSuccess: () => {
+      const principalId = identity?.getPrincipal().toString() ?? 'anonymous';
+      queryClient.invalidateQueries({ queryKey: ['hotelBookings', principalId] });
+      queryClient.invalidateQueries({ queryKey: ['guestProcessingBookings'] });
       queryClient.invalidateQueries({ queryKey: ['allBookings'] });
     },
   });
@@ -143,12 +196,12 @@ export function useGetHotelBookings() {
   const principalId = identity?.getPrincipal().toString() ?? 'anonymous';
 
   const query = useQuery<BookingRequest[]>({
-    queryKey: ['hotelPendingBookings', principalId],
+    queryKey: ['hotelBookings', principalId],
     queryFn: async () => {
       if (!actor) throw new Error('Connection not available');
       try {
         return await withTimeout(
-          actor.getHotelPendingBookings(),
+          actor.getHotelBookings(),
           10000,
           'Loading hotel bookings timed out after 10 seconds. Please retry.'
         );
@@ -171,6 +224,7 @@ export function useGetHotelBookings() {
 export function useConfirmBooking() {
   const { actor } = useActorSafe();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async (bookingId: bigint) => {
@@ -186,8 +240,9 @@ export function useConfirmBooking() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hotelBookings'] });
-      queryClient.invalidateQueries({ queryKey: ['hotelPendingBookings'] });
+      const principalId = identity?.getPrincipal().toString() ?? 'anonymous';
+      queryClient.invalidateQueries({ queryKey: ['hotelBookings', principalId] });
+      queryClient.invalidateQueries({ queryKey: ['guestProcessingBookings'] });
       queryClient.invalidateQueries({ queryKey: ['allBookings'] });
     },
   });
@@ -196,6 +251,7 @@ export function useConfirmBooking() {
 export function useRejectBooking() {
   const { actor } = useActorSafe();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async (bookingId: bigint) => {
@@ -211,8 +267,9 @@ export function useRejectBooking() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hotelBookings'] });
-      queryClient.invalidateQueries({ queryKey: ['hotelPendingBookings'] });
+      const principalId = identity?.getPrincipal().toString() ?? 'anonymous';
+      queryClient.invalidateQueries({ queryKey: ['hotelBookings', principalId] });
+      queryClient.invalidateQueries({ queryKey: ['guestProcessingBookings'] });
       queryClient.invalidateQueries({ queryKey: ['allBookings'] });
     },
   });

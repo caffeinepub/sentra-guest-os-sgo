@@ -1,44 +1,52 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project is an SGO web app on Caffeine; current focus is getting Draft v53 successfully published to live and applying UI cleanup on the Account Status page (remove technical sections like Troubleshooting and Publishing & Deployment for guest/hotel users).",
+  "summary": "Hotel booking app with admin, hotel, and guest accounts; add review/rating and align booking management features across roles without breaking existing functionality.",
   "architectural_notes": [
-    "Caffeine deployment/publish is handled by AI/system (no manual deploy button for end users)."
+    "App has role-based accounts: admin, hotel, guest; booking features and permissions differ by role."
   ],
   "known_issues": [
-    "Publishing Draft v53 to live fails with generic 'AI was unable to implement your request / couldn't complete your request' error."
+    "User reports app was published/deployed without implementing the requested revisions (review/rating + booking updates)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-account-status-page-to-hide-the-troubleshooting-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-and-use-troubleshooting-tools",
-      "title": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
+      "id": "feature-add-a-persistent-review-rating-feature-where-both-guest-accounts-and-hotel-accounts-can-create-a-review-with-a-1-5-star-rating-and-optional-text-and-list-existing-reviews",
+      "title": "Add a persistent Review/Rating feature where both Guest accounts and Hotel accounts can create a review with a 1–5 star rating and optional text, and list existing reviews.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-account-status-page-to-hide-the-publishing-deployment-help-section-from-non-admin-authenticated-users-only-admins-should-be-able-to-see-publishing-deployment-guidance",
-      "title": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
+      "id": "feature-update-the-hotel-account-bookings-section-so-its-booking-list-layout-model-matches-the-admin-bookings-panel-layout-model-scrollable-list-consistent-card-structure-and-key-booking-metadata",
+      "title": "Update the Hotel Account bookings section so its booking list layout/model matches the Admin bookings panel layout model (scrollable list, consistent card structure, and key booking metadata).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-revise-the-account-status-page-header-subtitle-copy-so-it-no-longer-advertises-troubleshooting-tools-to-non-admin-users-while-keeping-all-user-facing-text-in-english",
-      "title": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
+      "id": "feature-add-booking-actions-requested-by-role-hotel-account-must-have-cancel-and-delete-actions-guest-account-must-have-cancel-action-only",
+      "title": "Add booking actions requested by role: Hotel Account must have Cancel and Delete actions; Guest Account must have Cancel action only.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-perform-the-platform-publishing-step-to-publish-the-currently-deployed-draft-version-53-to-live-production-after-applying-the-agreed-ui-changes",
-      "title": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+      "id": "feature-ensure-the-requested-changes-are-implemented-and-verifiable-before-any-publish-deploy-guidance-is-shown-as-ready-and-add-clear-ui-messaging-that-publishing-should-not-occur-until-the-requested-revisions-are-complete",
+      "title": "Ensure the requested changes are implemented and verifiable before any publish/deploy guidance is shown as 'ready', and add clear UI messaging that publishing should not occur until the requested revisions are complete.",
       "reqIds": [
         "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-handle-invalid-published-url-situations-by-improving-user-facing-guidance-when-the-app-url-does-not-resolve-to-a-canister-e-g-gateway-canister-id-not-resolved-including-troubleshooting-steps-to-reach-the-correct-live-url",
+      "title": "Fix/handle invalid published URL situations by improving user-facing guidance when the app URL does not resolve to a canister (e.g., gateway 'Canister ID Not Resolved'), including troubleshooting steps to reach the correct live URL.",
+      "reqIds": [
+        "REQ-5"
       ],
       "version": 1
     }
@@ -46,25 +54,30 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Remove/hide 'Troubleshooting' section from Account Status page for guest/hotel users (keep technical info admin-only if needed)",
+      "summary": "Add review & rating feature so both guests and hotels can submit reviews/ratings (available in guest and hotel accounts).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Remove/hide 'Publishing & Deployment' section from Account Status page for guest/hotel users (keep technical info admin-only if needed)",
+      "summary": "Make booking list/management UI in hotel account match the model/features of booking management in admin account (per admin screenshot example).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Publish Draft Version 53 to live/production",
+      "summary": "Add booking actions: in hotel account add Cancel and Delete booking buttons; in guest account add Cancel booking button only.",
       "reqIds": [],
-      "status": "blocked"
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Ensure requested changes are implemented before publishing/deploying; do not disturb other existing features that are working normally.",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "SGO",
+  "projectName": "Hotel Booking",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,59 +1,83 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T18:14:00.741Z",
+  "generatedAt": "2026-02-16T15:58:50.333Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
+        "summary": "Add a persistent Review/Rating feature where both Guest accounts and Hotel accounts can create a review with a 1–5 star rating and optional text, and list existing reviews.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AccountStatusPage.tsx"
+          "frontend/src/hooks/useReviews.ts",
+          "frontend/src/components/reviews/StarRatingField.tsx",
+          "frontend/src/components/reviews/ReviewSubmitCard.tsx",
+          "frontend/src/components/reviews/ReviewsListCard.tsx",
+          "frontend/src/pages/GuestAccountPage.tsx",
+          "frontend/src/pages/HotelArea.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AccountStatusPage.tsx"
+          "frontend/src/hooks/useReviews.ts",
+          "frontend/src/components/reviews/StarRatingField.tsx",
+          "frontend/src/components/reviews/ReviewSubmitCard.tsx",
+          "frontend/src/components/reviews/ReviewsListCard.tsx",
+          "frontend/src/pages/GuestAccountPage.tsx",
+          "frontend/src/pages/HotelArea.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
+        "summary": "Update the Hotel Account bookings section so its booking list layout/model matches the Admin bookings panel layout model (scrollable list, consistent card structure, and key booking metadata).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AccountStatusPage.tsx"
+          "frontend/src/components/bookings/HotelBookingsSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AccountStatusPage.tsx"
+          "frontend/src/components/bookings/HotelBookingsSection.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
+        "summary": "Add booking actions requested by role: Hotel Account must have Cancel and Delete actions; Guest Account must have Cancel action only.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AccountStatusPage.tsx"
+          "frontend/src/hooks/useBookings.ts",
+          "frontend/src/components/bookings/GuestBookingsSection.tsx",
+          "frontend/src/components/bookings/HotelBookingsSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AccountStatusPage.tsx"
+          "frontend/src/hooks/useBookings.ts",
+          "frontend/src/components/bookings/GuestBookingsSection.tsx",
+          "frontend/src/components/bookings/HotelBookingsSection.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
+        "summary": "Ensure the requested changes are implemented and verifiable before any publish/deploy guidance is shown as 'ready', and add clear UI messaging that publishing should not occur until the requested revisions are complete.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/account/PrePublishGateCard.tsx",
-          "frontend/REGRESSION_CHECKLIST.md"
+          "frontend/src/pages/AccountStatusPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/account/PrePublishGateCard.tsx",
-          "frontend/REGRESSION_CHECKLIST.md"
+          "frontend/src/components/account/PrePublishGateCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Fix/handle invalid published URL situations by improving user-facing guidance when the app URL does not resolve to a canister (e.g., gateway 'Canister ID Not Resolved'), including troubleshooting steps to reach the correct live URL.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/account/PublishingDeploymentHelpSection.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/account/PublishingDeploymentHelpSection.tsx"
         ]
       }
     ]
@@ -61,12 +85,26 @@
   "changedFiles": [
     "backend/main.mo",
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/REGRESSION_CHECKLIST.md",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
     "frontend/src/components/account/PrePublishGateCard.tsx",
-    "frontend/src/pages/AccountStatusPage.tsx",
+    "frontend/src/components/account/PublishingDeploymentHelpSection.tsx",
+    "frontend/src/components/bookings/GuestBookingsSection.tsx",
+    "frontend/src/components/bookings/HotelBookingsSection.tsx",
+    "frontend/src/components/reviews/ReviewSubmitCard.tsx",
+    "frontend/src/components/reviews/ReviewsListCard.tsx",
+    "frontend/src/components/reviews/StarRatingField.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useBookings.ts",
+    "frontend/src/hooks/useReviews.ts",
+    "frontend/src/pages/GuestAccountPage.tsx",
+    "frontend/src/pages/HotelArea.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

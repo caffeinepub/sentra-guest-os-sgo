@@ -134,6 +134,15 @@ export const RSVP = IDL.Record({
   'timestamp' : Time,
   'attending' : IDL.Bool,
 });
+export const Review = IDL.Record({
+  'id' : IDL.Nat,
+  'createdAt' : Time,
+  'comment' : IDL.Opt(IDL.Text),
+  'targetType' : IDL.Text,
+  'rating' : IDL.Nat,
+  'reviewer' : IDL.Principal,
+  'targetId' : IDL.Principal,
+});
 export const StayRecord = IDL.Record({
   'id' : IDL.Nat,
   'hotelName' : IDL.Text,
@@ -153,6 +162,12 @@ export const InviteCode = IDL.Record({
   'used' : IDL.Bool,
 });
 export const HealthStatus = IDL.Record({ 'ok' : IDL.Bool, 'timestamp' : Time });
+export const ReviewInput = IDL.Record({
+  'comment' : IDL.Opt(IDL.Text),
+  'targetType' : IDL.Text,
+  'rating' : IDL.Nat,
+  'targetId' : IDL.Principal,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -168,6 +183,7 @@ export const idlService = IDL.Service({
     ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'cancelBooking' : IDL.Func([IDL.Nat], [], []),
+  'cancelHotelBooking' : IDL.Func([IDL.Nat], [], []),
   'checkInviteToken' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   'confirmBooking' : IDL.Func([IDL.Nat], [], []),
   'confirmPaymentRequest' : IDL.Func([IDL.Text], [], []),
@@ -179,6 +195,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'createStayRecord' : IDL.Func([CreateStayRecordInput], [IDL.Nat], []),
+  'deleteHotelBooking' : IDL.Func([IDL.Nat], [], []),
   'deleteRoomInventory' : IDL.Func([IDL.Principal, IDL.Text], [], []),
   'generateHotelInviteToken' : IDL.Func([IDL.Text], [IDL.Text], []),
   'generateInviteCode' : IDL.Func([], [IDL.Text], []),
@@ -192,6 +209,7 @@ export const idlService = IDL.Service({
   'getAllInviteTokens' : IDL.Func([], [IDL.Vec(InviteToken)], ['query']),
   'getAllPaymentRequests' : IDL.Func([], [IDL.Vec(PaymentRequest)], ['query']),
   'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
+  'getAllReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
   'getBookingRequest' : IDL.Func([IDL.Nat], [BookingRequest], ['query']),
   'getCallerPendingBookings' : IDL.Func(
       [],
@@ -229,6 +247,12 @@ export const idlService = IDL.Service({
     ),
   'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
   'getPaymentRequest' : IDL.Func([IDL.Text], [PaymentRequest], ['query']),
+  'getReview' : IDL.Func([IDL.Nat], [IDL.Opt(Review)], ['query']),
+  'getReviewsByTarget' : IDL.Func(
+      [IDL.Text, IDL.Principal],
+      [IDL.Vec(Review)],
+      ['query'],
+    ),
   'getTestingMode' : IDL.Func([], [IDL.Bool], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -247,6 +271,7 @@ export const idlService = IDL.Service({
   'setHotelVisibility' : IDL.Func([IDL.Principal, IDL.Bool, IDL.Bool], [], []),
   'setTestingMode' : IDL.Func([IDL.Bool], [], []),
   'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
+  'submitReview' : IDL.Func([ReviewInput], [IDL.Nat], []),
   'updateRoomInventory' : IDL.Func([IDL.Principal, RoomInventory], [], []),
 });
 
@@ -379,6 +404,15 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : Time,
     'attending' : IDL.Bool,
   });
+  const Review = IDL.Record({
+    'id' : IDL.Nat,
+    'createdAt' : Time,
+    'comment' : IDL.Opt(IDL.Text),
+    'targetType' : IDL.Text,
+    'rating' : IDL.Nat,
+    'reviewer' : IDL.Principal,
+    'targetId' : IDL.Principal,
+  });
   const StayRecord = IDL.Record({
     'id' : IDL.Nat,
     'hotelName' : IDL.Text,
@@ -395,6 +429,12 @@ export const idlFactory = ({ IDL }) => {
     'used' : IDL.Bool,
   });
   const HealthStatus = IDL.Record({ 'ok' : IDL.Bool, 'timestamp' : Time });
+  const ReviewInput = IDL.Record({
+    'comment' : IDL.Opt(IDL.Text),
+    'targetType' : IDL.Text,
+    'rating' : IDL.Nat,
+    'targetId' : IDL.Principal,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -410,6 +450,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'cancelBooking' : IDL.Func([IDL.Nat], [], []),
+    'cancelHotelBooking' : IDL.Func([IDL.Nat], [], []),
     'checkInviteToken' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
     'confirmBooking' : IDL.Func([IDL.Nat], [], []),
     'confirmPaymentRequest' : IDL.Func([IDL.Text], [], []),
@@ -421,6 +462,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'createStayRecord' : IDL.Func([CreateStayRecordInput], [IDL.Nat], []),
+    'deleteHotelBooking' : IDL.Func([IDL.Nat], [], []),
     'deleteRoomInventory' : IDL.Func([IDL.Principal, IDL.Text], [], []),
     'generateHotelInviteToken' : IDL.Func([IDL.Text], [IDL.Text], []),
     'generateInviteCode' : IDL.Func([], [IDL.Text], []),
@@ -442,6 +484,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
+    'getAllReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
     'getBookingRequest' : IDL.Func([IDL.Nat], [BookingRequest], ['query']),
     'getCallerPendingBookings' : IDL.Func(
         [],
@@ -479,6 +522,12 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
     'getPaymentRequest' : IDL.Func([IDL.Text], [PaymentRequest], ['query']),
+    'getReview' : IDL.Func([IDL.Nat], [IDL.Opt(Review)], ['query']),
+    'getReviewsByTarget' : IDL.Func(
+        [IDL.Text, IDL.Principal],
+        [IDL.Vec(Review)],
+        ['query'],
+      ),
     'getTestingMode' : IDL.Func([], [IDL.Bool], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
@@ -501,6 +550,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'setTestingMode' : IDL.Func([IDL.Bool], [], []),
     'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
+    'submitReview' : IDL.Func([ReviewInput], [IDL.Nat], []),
     'updateRoomInventory' : IDL.Func([IDL.Principal, RoomInventory], [], []),
   });
 };

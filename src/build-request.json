@@ -1,105 +1,117 @@
 {
   "kind": "build_request",
-  "title": "Hide Account Status technical sections for non-admin users and prepare Draft v53 for live publishing",
+  "title": "Implement reviews/ratings for guest & hotel + align hotel bookings UI with admin and add cancel/delete actions",
+  "projectName": "Hotel Booking",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the Account Status page to hide the \"Troubleshooting\" section from non-admin authenticated users; only admins should be able to see and use Troubleshooting tools.",
-      "target": "frontend",
+      "text": "Add a persistent Review/Rating feature where both Guest accounts and Hotel accounts can create a review with a 1–5 star rating and optional text, and list existing reviews.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-19"
+          "msg-1"
         ],
         "quotes": [
-          "YA LAKUKAN PRUBAHAN SESUAI DENGAN APA YANG SUDAG KITA BAHAS, MASA SAYA HARUS MENGULANG-ULANG SIH"
+          "Sekarang untuk review dan rating yang belum ada di akun tamu dan akun hotel. Saya minta baik tamu atau pun hotel bisa memberikan review dan rating."
         ]
       },
       "acceptanceCriteria": [
-        "When logged in as a non-admin user, the Account Status page does not render the Troubleshooting header, description, content, or its surrounding Separator(s).",
-        "When logged in as an admin, the Troubleshooting section renders exactly as before and remains functional.",
-        "Non-admin users do not see any button or link that scrolls to #troubleshooting."
+        "Backend defines a Review type that includes at least: id, author principal, target hotel principal, rating (1-5), optional text, createdAt.",
+        "Backend exposes canister methods to: create a review, list reviews for a hotel, and list reviews created by the caller.",
+        "Authorization rules are enforced: only authenticated users can create reviews; hotels can only create reviews as themselves (no spoofing), and guests can only create reviews as themselves.",
+        "Frontend adds UI in Guest Account and Hotel Area to: (1) submit a review (rating + optional text) and (2) view a list of reviews with rating and date.",
+        "All user-facing text in the new UI is in English."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the Account Status page to hide the \"Publishing & Deployment\" help section from non-admin authenticated users; only admins should be able to see Publishing/Deployment guidance.",
+      "text": "Update the Hotel Account bookings section so its booking list layout/model matches the Admin bookings panel layout model (scrollable list, consistent card structure, and key booking metadata).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-19"
+          "msg-1"
         ],
         "quotes": [
-          "YA LAKUKAN PRUBAHAN SESUAI DENGAN APA YANG SUDAG KITA BAHAS, MASA SAYA HARUS MENGULANG-ULANG SIH"
+          "Dan untuk fitur bookingan yang ada di akun hotel sama kan dengan model nya dengan fitur bookingan yang ada di akun admin. Ini saya berikan screenshot contoh nya di akun admin"
         ]
       },
       "acceptanceCriteria": [
-        "When logged in as a non-admin user, the Account Status page does not render the Publishing & Deployment card or its surrounding Separator(s).",
-        "When logged in as an admin, the Publishing & Deployment card renders and behaves as before (including any scroll-to-troubleshooting behavior)."
+        "Hotel bookings list uses a scrollable list (similar to AdminBookingsPanel) when there are many bookings.",
+        "Each booking card shows at minimum: booking id, status badge, guest principal (or truncated), room type, check-in/out dates, guests count, created date.",
+        "No regressions to existing hotel booking confirm/reject flows."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Revise the Account Status page header/subtitle copy so it no longer advertises troubleshooting tools to non-admin users, while keeping all user-facing text in English.",
-      "target": "frontend",
+      "text": "Add booking actions requested by role: Hotel Account must have Cancel and Delete actions; Guest Account must have Cancel action only.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-19"
+          "msg-1"
         ],
         "quotes": [
-          "Use English for any user-facing text in the build request."
+          "di akun hotel untuk fitur booking tambahkan tombol cancel dan delete bookingan dan di akun tamu untuk fitur bookingan cuma tambahkan tombol cancel."
         ]
       },
       "acceptanceCriteria": [
-        "For non-admin users, the Account Status page subtitle does not mention troubleshooting or deployment tools.",
-        "For admin users, the page may mention admin tools if desired, but all displayed text remains English."
+        "Guest Account: a visible Cancel action is available for cancellable bookings, and it calls the backend cancellation method and refreshes booking lists.",
+        "Hotel Account: a visible Cancel action is available for bookings belonging to the hotel and cancels the booking via a backend method, then refreshes hotel/admin/guest booking queries.",
+        "Hotel Account: a visible Delete action is available for bookings belonging to the hotel and deletes the booking via a backend method, then refreshes hotel/admin/guest booking queries.",
+        "Delete is not available in Guest Account.",
+        "Backend enforces ownership/authorization for cancel/delete: hotels can only cancel/delete bookings for their own hotel; guests can only cancel their own bookings; admins keep existing visibility.",
+        "UI shows confirmation prompts for cancel/delete and shows success/error toasts."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Perform the platform publishing step to publish the currently deployed Draft Version 53 to live/production after applying the agreed UI changes.",
-      "target": "unknown",
+      "text": "Ensure the requested changes are implemented and verifiable before any publish/deploy guidance is shown as 'ready', and add clear UI messaging that publishing should not occur until the requested revisions are complete.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-12",
-          "msg-14",
-          "msg-19"
+          "msg-1"
         ],
         "quotes": [
-          "publish skarang",
-          "ya sudah laukan publish live nya'",
-          "YA LAKUKAN PRUBAHAN SESUAI DENGAN APA YANG SUDAG KITA BAHAS, MASA SAYA HARUS MENGULANG-ULANG SIH"
+          "anda ini belum melalukan perbaikan kena langsug publish? apa yang mau di publish revisi yang saya minta saja belum di kerjakan"
         ]
       },
       "acceptanceCriteria": [
-        "A live/production link is produced by the platform after the publish operation completes successfully.",
-        "The live version reflects the Account Status page changes from REQ-1 and REQ-2 (non-admin users no longer see Troubleshooting or Publishing & Deployment sections)."
+        "Account/Publishing-related UI (e.g., pre-publish checklist content) includes explicit English messaging that this release must not be published until 'Reviews/Ratings' and 'Booking actions (cancel/delete) & hotel booking UI alignment' are verified.",
+        "No existing features outside the requested scope are modified beyond what is necessary to support the new review/rating and booking action changes."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Fix/handle invalid published URL situations by improving user-facing guidance when the app URL does not resolve to a canister (e.g., gateway 'Canister ID Not Resolved'), including troubleshooting steps to reach the correct live URL.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "mana link publish nya?",
+          "Canister ID Not Resolved (screenshot)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Add an English troubleshooting note in the existing deployment/publishing help UI explaining what 'Canister ID Not Resolved' means and how to obtain the correct live URL from the deployment UI.",
+        "Guidance does not require external services; it only references the app/editor deployment outputs already available to the user."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/components/ui (read-only UI component sources).",
-    "Do not modify any paths listed in SYSTEM_CONTEXT.frontend.immutablePaths.",
-    "Keep backend as a single Motoko actor (no additional backend services).",
-    "All user-facing text must be English."
+    "Do not disturb or break other existing features that are already working normally.",
+    "Backend must remain a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
+    "Do not edit files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT.",
+    "All new user-facing text added by this request must be in English."
   ],
   "nonGoals": [
-    "Do not add new authentication methods (Internet Identity remains the only auth method).",
-    "Do not introduce new features unrelated to Account Status page cleanup or publishing Draft v53.",
-    "Do not add external databases or third-party backend services."
+    "Do not add third-party authentication providers (only Internet Identity).",
+    "Do not add real-time features (WebSockets/chat/notifications).",
+    "Do not redesign unrelated pages or change existing business rules outside bookings and reviews/ratings."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

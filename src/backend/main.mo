@@ -11,9 +11,6 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import InviteLinksModule "invite-links/invite-links-module";
 
-import List "mo:core/List";
-
-
 actor {
   public type UserProfile = {
     name : Text;
@@ -189,6 +186,23 @@ actor {
     timestamp : Time.Time;
   };
 
+  public type Review = {
+    id : Nat;
+    reviewer : Principal;
+    targetType : Text;
+    targetId : Principal;
+    rating : Nat;
+    comment : ?Text;
+    createdAt : Time.Time;
+  };
+
+  public type ReviewInput = {
+    targetType : Text;
+    targetId : Principal;
+    rating : Nat;
+    comment : ?Text;
+  };
+
   let paymentRequests = Map.empty<Text, PaymentRequest>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let hotelProfiles = Map.empty<Principal, HotelProfile>();
@@ -197,6 +211,7 @@ actor {
   let stayRecords = Map.empty<Nat, StayRecord>();
   let bookingRequests = Map.empty<Nat, BookingRequest>();
   let hotelVisibility = Map.empty<Principal, HotelVisibility>();
+  let reviews = Map.empty<Nat, Review>();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -566,6 +581,22 @@ actor {
       Runtime.trap("Invalid guest: Cannot create stay record for anonymous principal");
     };
 
+    // AUTHORIZATION FIX: Verify that a confirmed booking exists for this guest-hotel combination
+    // This prevents hotels from creating fake stay records for arbitrary guests
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      let hasConfirmedBooking = bookingRequests.values().any(
+        func(booking : BookingRequest) : Bool {
+          booking.guest == input.guest and 
+          booking.hotel == input.hotel and 
+          booking.status == #confirmed
+        }
+      );
+      
+      if (not hasConfirmedBooking) {
+        Runtime.trap("Unauthorized: Cannot create stay record without a confirmed booking for this guest");
+      };
+    };
+
     let stayRecord : StayRecord = {
       id = nextId;
       guest = input.guest;
@@ -672,6 +703,35 @@ actor {
     };
   };
 
+  public shared ({ caller }) func cancelHotelBooking(id : Nat) : async () {
+    checkHotelOperationsAuthorization(caller);
+
+    switch (bookingRequests.get(id)) {
+      case (null) { Runtime.trap("No such booking request") };
+      case (?request) {
+        if (not AccessControl.isAdmin(accessControlState, caller)) {
+          checkHotelInventoryOwnership(caller, request.hotel);
+        };
+        let updatedRequest = { request with status = #cancelled; lastUpdated = Time.now() };
+        bookingRequests.add(id, updatedRequest);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteHotelBooking(id : Nat) : async () {
+    checkHotelOperationsAuthorization(caller);
+
+    switch (bookingRequests.get(id)) {
+      case (null) { Runtime.trap("No such booking request") };
+      case (?request) {
+        if (not AccessControl.isAdmin(accessControlState, caller)) {
+          checkHotelInventoryOwnership(caller, request.hotel);
+        };
+        bookingRequests.remove(id);
+      };
+    };
+  };
+
   public shared ({ caller }) func confirmBooking(id : Nat) : async () {
     checkHotelOperationsAuthorization(caller);
 
@@ -735,6 +795,7 @@ actor {
     callerBookings.toArray();
   };
 
+  // Update here: get all relevant hotel bookings, not only #pending
   public query ({ caller }) func getHotelBookings() : async [BookingRequest] {
     checkHotelOperationsAuthorization(caller);
 
@@ -742,7 +803,9 @@ actor {
       return bookingRequests.values().toArray();
     };
 
-    let hotelBookings = bookingRequests.values().filter(func(record) { record.hotel == caller });
+    let hotelBookings = bookingRequests.values().filter(
+      func(record) { record.hotel == caller and (record.status == #pending or record.status == #confirmed) }
+    );
     hotelBookings.toArray();
   };
 
@@ -835,6 +898,45 @@ actor {
         };
       }
     );
+  };
+
+  public shared ({ caller }) func submitReview(input : ReviewInput) : async Nat {
+    checkAuthenticated(caller);
+
+    if (input.rating < 1 or input.rating > 5) {
+      Runtime.trap("Rating must be between 1 and 5");
+    };
+
+    let review : Review = {
+      id = nextId;
+      reviewer = caller;
+      targetType = input.targetType;
+      targetId = input.targetId;
+      rating = input.rating;
+      comment = input.comment;
+      createdAt = Time.now();
+    };
+
+    reviews.add(nextId, review);
+    nextId += 1;
+    review.id;
+  };
+
+  public query ({ caller }) func getReview(id : Nat) : async ?Review {
+    checkAuthenticated(caller);
+    reviews.get(id);
+  };
+
+  public query ({ caller }) func getReviewsByTarget(targetType : Text, targetId : Principal) : async [Review] {
+    checkAuthenticated(caller);
+    reviews.values().toArray().filter(
+      func(review) { review.targetType == targetType and review.targetId == targetId }
+    );
+  };
+
+  public query ({ caller }) func getAllReviews() : async [Review] {
+    checkAuthenticated(caller);
+    reviews.values().toArray();
   };
 
   func checkAuthenticated(caller : Principal) {

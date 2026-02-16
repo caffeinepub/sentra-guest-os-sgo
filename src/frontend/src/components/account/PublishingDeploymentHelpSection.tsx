@@ -1,129 +1,144 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Rocket, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AlertCircle, CheckCircle2, RefreshCw, Rocket, AlertTriangle } from 'lucide-react';
 
 export default function PublishingDeploymentHelpSection() {
-  const scrollToTroubleshooting = () => {
-    const element = document.getElementById('troubleshooting');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   return (
-    <Card className="border-blue-500/50 bg-blue-500/5">
+    <Card>
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 flex-shrink-0">
-            <Rocket className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <CardTitle className="text-lg sm:text-xl">Publishing & Deployment</CardTitle>
-            <CardDescription className="text-sm">
-              Step-by-step guide for deploying changes and verifying updates
-            </CardDescription>
-          </div>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Rocket className="h-5 w-5" />
+          Publishing & Deployment Help
+        </CardTitle>
+        <CardDescription>
+          Step-by-step guidance for deploying and troubleshooting your application
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* How to Publish/Deploy */}
-        <div className="space-y-3">
-          <div className="flex items-start gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 flex-shrink-0 mt-0.5">
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400">1</span>
-            </div>
-            <div className="space-y-1 flex-1">
-              <h3 className="text-sm font-semibold">How to Publish/Deploy</h3>
-              <p className="text-xs text-muted-foreground">
-                To publish your changes to production, use the chat interface to request a deployment. 
-                The AI agent will build and deploy your application to the Internet Computer network.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Example: "Please deploy the latest changes" or "Publish to production"
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* What to Do When Deploy Fails */}
-        <div className="space-y-3">
-          <div className="flex items-start gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/10 flex-shrink-0 mt-0.5">
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">2</span>
-            </div>
-            <div className="space-y-2 flex-1">
-              <h3 className="text-sm font-semibold">When Deployment Fails</h3>
-              <p className="text-xs text-muted-foreground">
-                If the deployment fails, simply request to retry the deployment:
-              </p>
-              <Alert className="border-amber-500/50 bg-amber-500/10">
-                <RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                <AlertTitle className="text-xs text-amber-600 dark:text-amber-400">Retry Action</AlertTitle>
-                <AlertDescription className="text-xs text-amber-600/80 dark:text-amber-400/80">
-                  Say: "Please retry the deployment" or "Deploy again"
-                </AlertDescription>
-              </Alert>
-              <p className="text-xs text-muted-foreground">
-                Most deployment failures are temporary network issues. Retrying usually resolves the problem.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* What to Do When UI Doesn't Update After Successful Deploy */}
-        <div className="space-y-3">
-          <div className="flex items-start gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10 flex-shrink-0 mt-0.5">
-              <span className="text-xs font-bold text-green-600 dark:text-green-400">3</span>
-            </div>
-            <div className="space-y-2 flex-1">
-              <h3 className="text-sm font-semibold">When Changes Don't Appear After Successful Deploy</h3>
-              <p className="text-xs text-muted-foreground">
-                If deployment succeeds but you don't see your changes, the issue is likely cached assets. 
-                Follow these steps in order:
-              </p>
-              <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside pl-2">
-                <li>
-                  <strong>Hard Refresh:</strong> Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+Shift+R</kbd> (Windows/Linux) 
-                  or <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Cmd+Shift+R</kbd> (Mac) to bypass browser cache
-                </li>
-                <li>
-                  <strong>Clear App Cache:</strong> Use the "Reset app cache" action in the Troubleshooting section below
-                </li>
-                <li>
-                  <strong>Disable Offline Cache:</strong> If the above doesn't work, use "Disable offline cache & reload" 
-                  in the Troubleshooting section to remove service workers and cache storage
-                </li>
-                <li>
-                  <strong>Verify Version:</strong> Check the footer or a specific UI element you changed to confirm the new version is loaded
-                </li>
+      <CardContent className="space-y-4">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="how-to-publish">
+            <AccordionTrigger className="text-sm font-medium">
+              How to Request Deployment
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 text-sm text-muted-foreground">
+              <p>To deploy your application to production:</p>
+              <ol className="list-decimal list-inside space-y-2 pl-2">
+                <li>Ensure all features are implemented and tested in draft mode</li>
+                <li>Request deployment from the editor or build interface</li>
+                <li>Wait for the deployment process to complete (usually 2-5 minutes)</li>
+                <li>Once deployed, you'll receive a live URL for your application</li>
               </ol>
-              <Alert className="border-green-500/50 bg-green-500/10">
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <AlertTitle className="text-xs text-green-600 dark:text-green-400">Pro Tip</AlertTitle>
-                <AlertDescription className="text-xs text-green-600/80 dark:text-green-400/80">
-                  After deployment, always do a hard refresh first. This solves 90% of "changes not visible" issues.
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  The live URL will be displayed in the deployment output and typically follows the format: <code className="text-xs">https://[canister-id].icp0.io/</code>
                 </AlertDescription>
               </Alert>
-            </div>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Link to Troubleshooting Tools */}
-        <div className="pt-4 border-t">
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2"
-            onClick={scrollToTroubleshooting}
-          >
-            <AlertCircle className="h-4 w-4" />
-            Go to Troubleshooting Tools
-          </Button>
-          <p className="text-xs text-muted-foreground mt-2">
-            Access cache reset and offline cache management tools to resolve stale asset issues
-          </p>
-        </div>
+          <AccordionItem value="deployment-failures">
+            <AccordionTrigger className="text-sm font-medium">
+              Handling Deployment Failures
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 text-sm text-muted-foreground">
+              <p>If deployment fails:</p>
+              <ol className="list-decimal list-inside space-y-2 pl-2">
+                <li>Check the deployment logs for specific error messages</li>
+                <li>Common issues include:
+                  <ul className="list-disc list-inside pl-6 mt-1 space-y-1">
+                    <li>Network timeouts - retry deployment</li>
+                    <li>Build errors - check code syntax and dependencies</li>
+                    <li>Canister capacity issues - contact support</li>
+                  </ul>
+                </li>
+                <li>Wait a few minutes and retry the deployment</li>
+                <li>If issues persist, use the troubleshooting tools below</li>
+              </ol>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="ui-not-updating">
+            <AccordionTrigger className="text-sm font-medium">
+              UI Not Updating After Deployment
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 text-sm text-muted-foreground">
+              <p>If the UI doesn't reflect your latest changes after deployment:</p>
+              <ol className="list-decimal list-inside space-y-2 pl-2">
+                <li><strong>Hard Refresh:</strong> Press <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">Ctrl+Shift+R</kbd> (Windows/Linux) or <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">Cmd+Shift+R</kbd> (Mac)</li>
+                <li><strong>Clear Browser Cache:</strong> Go to browser settings and clear cached images and files</li>
+                <li><strong>Disable PWA Cache:</strong> Use the "Disable PWA Offline Cache" button in the <a href="#troubleshooting" className="text-primary hover:underline">Troubleshooting section</a></li>
+                <li><strong>Verify Deployment:</strong> Check that the deployment completed successfully and note the live URL</li>
+              </ol>
+              <Alert>
+                <RefreshCw className="h-4 w-4" />
+                <AlertDescription>
+                  After clearing caches, always perform a hard refresh to ensure you're loading the latest version.
+                </AlertDescription>
+              </Alert>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="canister-id-not-resolved">
+            <AccordionTrigger className="text-sm font-medium">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                "Canister ID Not Resolved" Error
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 text-sm text-muted-foreground">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>What This Error Means</AlertTitle>
+                <AlertDescription>
+                  This error indicates that the URL you're trying to access does not point to a deployed canister on the Internet Computer network. The gateway cannot determine which canister should handle the request.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-2">
+                <p className="font-medium">How to Find the Correct Live URL:</p>
+                <ol className="list-decimal list-inside space-y-2 pl-2">
+                  <li><strong>Check Deployment Output:</strong> After a successful deployment, the live URL is displayed in the deployment logs or output panel</li>
+                  <li><strong>Look for the Canister ID:</strong> The URL format is typically <code className="text-xs bg-muted px-1 py-0.5 rounded">https://[canister-id].icp0.io/</code></li>
+                  <li><strong>Copy the Correct URL:</strong> Use the exact URL provided in the deployment output</li>
+                  <li><strong>Bookmark the URL:</strong> Save the correct URL to avoid confusion in the future</li>
+                </ol>
+              </div>
+
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Example:</strong> If your deployment output shows <code className="text-xs">https://abc123-xyz.icp0.io/</code>, that is your correct live URL. Any other URL will result in this error.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-2">
+                <p className="font-medium">Common Causes:</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>Using a draft/preview URL instead of the production URL</li>
+                  <li>Typing the URL manually with incorrect canister ID</li>
+                  <li>Using an old URL from a previous deployment</li>
+                  <li>Accessing the app before deployment has completed</li>
+                </ul>
+              </div>
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Solution:</strong> Always use the live URL provided in your deployment output. If you've lost the URL, redeploy the application and copy the URL from the deployment logs.
+                </AlertDescription>
+              </Alert>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-xs">
+            For additional help, refer to the <a href="#troubleshooting" className="text-primary hover:underline">Troubleshooting section</a> below or contact support if issues persist.
+          </AlertDescription>
+        </Alert>
       </CardContent>
     </Card>
   );

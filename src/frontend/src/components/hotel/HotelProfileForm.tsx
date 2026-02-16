@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, MapPin, Star, ExternalLink, Upload, X } from 'lucide-react';
+import { Loader2, MapPin, Star, ExternalLink, Upload, X, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 
@@ -79,6 +80,7 @@ export default function HotelProfileForm() {
   const [country, setCountry] = useState('');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoData, setLogoData] = useState<string | null>(null);
+  const [paymentInstructions, setPaymentInstructions] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -90,6 +92,7 @@ export default function HotelProfileForm() {
       setAddress(hotelProfile.location?.address || '');
       setMapLink(hotelProfile.location?.mapLink || '');
       setCountry(hotelProfile.country || '');
+      setPaymentInstructions(hotelProfile.payment_instructions || '');
       if (hotelProfile.logo) {
         setLogoPreview(hotelProfile.logo);
         setLogoData(hotelProfile.logo);
@@ -188,6 +191,7 @@ export default function HotelProfileForm() {
         },
         country: country.trim(),
         logo: logoData || undefined,
+        payment_instructions: paymentInstructions.trim() || undefined,
         rooms: hotelProfile?.rooms || [], // Preserve existing rooms or use empty array
       };
 
@@ -355,7 +359,7 @@ export default function HotelProfileForm() {
               id="address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter complete hotel address"
+              placeholder="Enter full hotel address"
               className={errors.address ? 'border-destructive' : ''}
             />
             {errors.address && (
@@ -365,53 +369,62 @@ export default function HotelProfileForm() {
 
           {/* Map Link */}
           <div className="space-y-2">
-            <Label htmlFor="mapLink">
-              Map Link (Google Maps or similar) <span className="text-destructive">*</span>
+            <Label htmlFor="mapLink" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Map Link <span className="text-destructive">*</span>
             </Label>
-            <Input
-              id="mapLink"
-              type="url"
-              value={mapLink}
-              onChange={(e) => setMapLink(e.target.value)}
-              placeholder="https://maps.google.com/..."
-              className={errors.mapLink ? 'border-destructive' : ''}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="mapLink"
+                value={mapLink}
+                onChange={(e) => setMapLink(e.target.value)}
+                placeholder="https://maps.google.com/..."
+                className={errors.mapLink ? 'border-destructive' : ''}
+              />
+              {mapLink && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  asChild
+                >
+                  <a href={mapLink} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              )}
+            </div>
             {errors.mapLink && (
               <p className="text-sm text-destructive">{errors.mapLink}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              Paste the full URL from Google Maps or another map service
+              Paste a Google Maps link or similar map service URL
             </p>
           </div>
 
-          {/* Display saved location */}
-          {hotelProfile?.location?.mapLink && (
-            <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                <div className="flex-1 space-y-1 min-w-0">
-                  <p className="text-sm font-medium">Current Location</p>
-                  <p className="text-sm text-muted-foreground break-words">{hotelProfile.location.address}</p>
-                  <a
-                    href={hotelProfile.location.mapLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    View on map
-                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Payment Method / Contact Information */}
+          <div className="space-y-2">
+            <Label htmlFor="paymentInstructions" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Payment Method & Contact Information
+            </Label>
+            <Textarea
+              id="paymentInstructions"
+              value={paymentInstructions}
+              onChange={(e) => setPaymentInstructions(e.target.value)}
+              placeholder="e.g., Bank transfer to account 1234567890&#10;Phone: +62 812 3456 7890&#10;Email: contact@yourhotel.com&#10;Cash on arrival accepted"
+              rows={5}
+            />
+            <p className="text-xs text-muted-foreground">
+              Describe payment methods and include contact information (phone, email) for guests to reach you
+            </p>
+          </div>
         </div>
 
         <Button
           onClick={handleSave}
           disabled={saveProfile.isPending}
           className="w-full"
-          size="lg"
         >
           {saveProfile.isPending ? (
             <>

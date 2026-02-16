@@ -247,6 +247,7 @@ export default function BrowseHotels() {
                           <GuestHotelRoomsDialog
                             hotelName={hotel.name}
                             rooms={hotel.rooms}
+                            hotelProfile={hotel}
                             trigger={
                               <Button variant="outline" size="sm" className="gap-2">
                                 <BedDouble className="h-4 w-4" />

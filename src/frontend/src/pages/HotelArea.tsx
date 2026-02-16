@@ -3,18 +3,22 @@ import { useHotelAccess } from '../hooks/useHotelAccess';
 import { useSubscriptionStatus } from '../hooks/usePaymentRequest';
 import { useGetHotelBookings } from '../hooks/useBookings';
 import { useActorSafe } from '../hooks/useActorSafe';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { Principal } from '@icp-sdk/core/principal';
 import RequireActorReady from '../components/auth/RequireActorReady';
 import HotelInviteGate from '../components/hotel/HotelInviteGate';
 import HotelProfileForm from '../components/hotel/HotelProfileForm';
 import HotelBookingsSection from '../components/bookings/HotelBookingsSection';
 import RecordStayCard from '../components/hotel/RecordStayCard';
 import HotelRoomsManager from '../components/hotel/HotelRoomsManager';
+import ReviewSubmitCard from '../components/reviews/ReviewSubmitCard';
+import ReviewsListCard from '../components/reviews/ReviewsListCard';
 import RouteDiagnosticsErrorCard from '../components/diagnostics/RouteDiagnosticsErrorCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle, Building2, CalendarCheck, History, CreditCard, RefreshCw, BedDouble } from 'lucide-react';
+import { Loader2, AlertCircle, Building2, CalendarCheck, History, CreditCard, RefreshCw, BedDouble, Star } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 
 function HotelAreaContent() {
@@ -23,6 +27,9 @@ function HotelAreaContent() {
   const { data: profile, isLoading: profileLoading } = useGetHotelProfile();
   const { data: subscriptionStatus, isLoading: subscriptionLoading } = useSubscriptionStatus();
   const { data: bookings, isLoading: bookingsLoading, isError: bookingsError, error: bookingsErrorObj, refetch: refetchBookings } = useGetHotelBookings();
+  const { identity } = useInternetIdentity();
+
+  const hotelPrincipal = identity?.getPrincipal();
 
   // Show loading only during initial load
   if (actorLoading || accessLoading) {
@@ -91,7 +98,7 @@ function HotelAreaContent() {
         <div className="space-y-3 md:space-y-4">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Hotel Management</h1>
           <p className="text-base sm:text-lg text-muted-foreground">
-            Manage your hotel profile, bookings, and guest stays
+            Manage your hotel profile, bookings, reviews, and guest stays
           </p>
         </div>
 
@@ -106,7 +113,7 @@ function HotelAreaContent() {
         )}
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
             <TabsTrigger value="profile" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -118,6 +125,10 @@ function HotelAreaContent() {
             <TabsTrigger value="bookings" className="gap-2">
               <CalendarCheck className="h-4 w-4" />
               <span className="hidden sm:inline">Bookings</span>
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="gap-2">
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Reviews</span>
             </TabsTrigger>
             <TabsTrigger value="stays" className="gap-2">
               <History className="h-4 w-4" />
@@ -170,6 +181,35 @@ function HotelAreaContent() {
             ) : (
               <HotelBookingsSection />
             )}
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Star className="h-6 w-6" />
+                  Reviews & Ratings
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  View reviews for your hotel and submit reviews for other hotels
+                </p>
+              </div>
+
+              {hotelPrincipal && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <ReviewSubmitCard
+                    targetId={hotelPrincipal}
+                    targetType="hotel"
+                    targetName={profile?.name}
+                  />
+                  <ReviewsListCard
+                    targetId={hotelPrincipal}
+                    targetType="hotel"
+                    targetName={profile?.name}
+                  />
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="stays">
@@ -281,7 +321,7 @@ function HotelAreaContent() {
 
 export default function HotelArea() {
   return (
-    <RequireActorReady>
+    <RequireActorReady loadingMessage="Loading hotel area...">
       <HotelAreaContent />
     </RequireActorReady>
   );
